@@ -41,14 +41,18 @@ const styles = theme => ({
 })
 
 class Signin extends Component {
-    state = {
-        email: '',
-        password: '',
-        error: '',
-        redirectToReferrer: false,
+    constructor(props) {
+        super(props)
+        this.state = {
+            email: '',
+            password: '',
+            error: '',
+            redirectToReferrer: false,
+        }
     }
 
-    clickSubmit = () => {
+    clickSubmit = e => {
+        e.preventDefault()
         const user = {
             email: this.state.email || undefined,
             password: this.state.password || undefined,
@@ -82,56 +86,59 @@ class Signin extends Component {
         }
 
         return (
-            <Card className={classes.card}>
-                <CardContent>
-                    <Typography
-                        type="headline"
-                        component="h2"
-                        className={classes.title}
-                    >
-                        Sign In
-                    </Typography>
-                    <TextField
-                        id="email"
-                        type="email"
-                        label="Email"
-                        className={classes.textField}
-                        value={this.state.email}
-                        onChange={this.handleChange('email')}
-                        margin="normal"
-                    />
-                    <br />
-                    <TextField
-                        id="password"
-                        type="password"
-                        label="Password"
-                        className={classes.textField}
-                        value={this.state.password}
-                        onChange={this.handleChange('password')}
-                        margin="normal"
-                    />
-                    <br />{' '}
-                    {this.state.error && (
-                        <Typography component="p" color="error">
-                            <Icon color="error" className={classes.error}>
-                                error
-                            </Icon>
-                            {this.state.error}
+            <form onSubmit={this.clickSubmit}>
+                <Card className={classes.card}>
+                    <CardContent>
+                        <Typography
+                            type="headline"
+                            component="h2"
+                            className={classes.title}
+                        >
+                            Sign In
                         </Typography>
-                    )}
-                </CardContent>
-                <CardActions>
-                    <Button
-                        fullWidth
-                        color="primary"
-                        variant="contained"
-                        onClick={this.clickSubmit}
-                        className={classes.submit}
-                    >
-                        Submit
-                    </Button>
-                </CardActions>
-            </Card>
+                        <TextField
+                            id="email"
+                            type="email"
+                            label="Email"
+                            className={classes.textField}
+                            value={this.state.email}
+                            onChange={this.handleChange('email')}
+                            margin="normal"
+                            autoComplete="email"
+                        />
+                        <br />
+                        <TextField
+                            id="password"
+                            type="password"
+                            label="Password"
+                            className={classes.textField}
+                            value={this.state.password}
+                            onChange={this.handleChange('password')}
+                            margin="normal"
+                            autoComplete="password"
+                        />
+                        <br />{' '}
+                        {this.state.error && (
+                            <Typography component="p" color="error">
+                                <Icon color="error" className={classes.error}>
+                                    error
+                                </Icon>
+                                {this.state.error}
+                            </Typography>
+                        )}
+                    </CardContent>
+                    <CardActions>
+                        <Button
+                            type="submit"
+                            className={classes.submit}
+                            variant="contained"
+                            color="primary"
+                        >
+                            Submit
+                        </Button>
+                    </CardActions>
+                </Card>
+            </form>
         )
     }
 }

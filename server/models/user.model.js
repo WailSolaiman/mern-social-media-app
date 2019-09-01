@@ -6,6 +6,17 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         required: 'Name is required',
     },
+    about: {
+        type: String,
+        trim: true,
+    },
+    image_name: {
+        type: String,
+        default: 'none',
+    },
+    image_data: {
+        type: String,
+    },
     email: {
         type: String,
         trim: true,

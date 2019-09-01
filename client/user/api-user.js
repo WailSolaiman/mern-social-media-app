@@ -33,6 +33,10 @@ const update = (params, credentials, user) => {
     })
 }
 
+const saveProfileImage = (userId, imageFormData) => {
+    return axios.post('/api/image/' + userId, imageFormData)
+}
+
 const remove = (params, credentials) => {
     return axios.delete('/api/users/' + params.userId, {
         headers: {
@@ -43,4 +47,4 @@ const remove = (params, credentials) => {
     })
 }
 
-export { create, list, read, update, remove }
+export { create, list, read, update, saveProfileImage, remove }

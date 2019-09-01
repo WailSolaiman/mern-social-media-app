@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Redirect, Link } from 'react-router-dom'
+import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
@@ -14,7 +15,7 @@ import {
     Divider,
     Typography,
 } from '@material-ui/core'
-import { Edit, Person } from '@material-ui/icons'
+import { Edit } from '@material-ui/icons'
 import auth from '../auth/auth-helper'
 import { read } from './api-user.js'
 import DeleteUser from './DeleteUser'
@@ -30,6 +31,11 @@ const styles = theme => ({
         margin: `${theme.spacing(3)}px 0 ${theme.spacing(3)}px`,
         color: theme.palette.protectedTitle,
     },
+    bigAvatar: {
+        width: 60,
+        height: 60,
+        margin: 10,
+    },
 })
 
 class Profile extends Component {
@@ -41,6 +47,7 @@ class Profile extends Component {
         }
         this.match = match
     }
+
     init = userId => {
         const jwt = auth.isAuthenticated()
         read(
@@ -56,15 +63,18 @@ class Profile extends Component {
                 this.setState({ redirectToSignin: true })
             })
     }
+
     componentDidMount = () => {
         this.init(this.match.params.userId)
     }
+
     render() {
         const { classes } = this.props
         const redirectToSignin = this.state.redirectToSignin
         if (redirectToSignin) {
             return <Redirect to="/signin" />
         }
+
         return (
             <Paper className={classes.root} elevation={4}>
                 <Typography type="title" className={classes.title}>
@@ -73,9 +83,15 @@ class Profile extends Component {
                 <List dense>
                     <ListItem>
                         <ListItemAvatar>
-                            <Avatar>
-                                <Person />
-                            </Avatar>
+                            <Avatar
+                                src={
+                                    this.state.user.image_data
+                                        ? '/' +
+                                          slash(this.state.user.image_data)
+                                        : ''
+                                }
+                                className={classes.bigAvatar}
+                            />
                         </ListItemAvatar>
                         <ListItemText
                             primary={this.state.user.name}
@@ -100,6 +116,9 @@ class Profile extends Component {
                             )}
                     </ListItem>
                     <Divider />
+                    <ListItem>
+                        <ListItemText primary={this.state.user.about} />
+                    </ListItem>
                     <ListItem>
                         <ListItemText
                             primary={

@@ -1,7 +1,7 @@
 import express from 'express'
+import { upload } from '../../config/multerConfig'
 import userCtrl from '../controllers/user.controller'
 import authCtrl from '../controllers/auth.controller'
-
 const router = express.Router()
 
 router
@@ -14,6 +14,10 @@ router
     .get(authCtrl.requireSignin, userCtrl.read)
     .put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.update)
     .delete(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.remove)
+
+router
+    .route('/api/image/:userId')
+    .post(upload.single('imageData'), userCtrl.createImage)
 
 router.param('userId', userCtrl.userByID)
 

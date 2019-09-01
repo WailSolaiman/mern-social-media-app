@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import { Card, CardContent, CardMedia, Typography } from '@material-ui/core'
-import seashellImg from '../assets/images/seashell.jpg'
+import seashellImg from '../assets/images/seashell.jpeg'
 
 const styles = theme => ({
     card: {

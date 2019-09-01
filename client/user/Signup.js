@@ -51,6 +51,7 @@ class Signup extends Component {
             name: '',
             password: '',
             email: '',
+            about: '',
             open: false,
             error: '',
         }
@@ -61,9 +62,11 @@ class Signup extends Component {
     closeDialog = () => {
         this.setState({ errorOpen: false })
     }
-    clickSubmit = () => {
+    clickSubmit = e => {
+        e.preventDefault()
         const user = {
             name: this.state.name || undefined,
+            about: this.state.about,
             email: this.state.email || undefined,
             password: this.state.password || undefined,
         }
@@ -81,7 +84,7 @@ class Signup extends Component {
     render() {
         const { classes } = this.props
         return (
-            <div>
+            <form onSubmit={this.clickSubmit}>
                 <Card className={classes.card}>
                     <CardContent>
                         <Typography
@@ -94,10 +97,12 @@ class Signup extends Component {
                         <TextField
                             id="name"
                             label="Name"
+                            type="text"
                             className={classes.textField}
                             value={this.state.name}
                             onChange={this.handleChange('name')}
                             margin="normal"
+                            autoComplete="text"
                         />
                         <br />
                         <TextField
@@ -108,6 +113,7 @@ class Signup extends Component {
                             value={this.state.email}
                             onChange={this.handleChange('email')}
                             margin="normal"
+                            autoComplete="email"
                         />
                         <br />
                         <TextField
@@ -118,6 +124,7 @@ class Signup extends Component {
                             value={this.state.password}
                             onChange={this.handleChange('password')}
                             margin="normal"
+                            autoComplete="password"
                         />
                         <br />{' '}
                         {this.state.error && (
@@ -131,11 +138,10 @@ class Signup extends Component {
                     </CardContent>
                     <CardActions>
                         <Button
+                            type="submit"
                             fullWidth
-                            color="primary"
                             variant="contained"
-                            onClick={this.clickSubmit}
-                            className={classes.submit}
+                            color="primary"
                         >
                             Submit
                         </Button>
@@ -151,7 +157,8 @@ class Signup extends Component {
                     <DialogActions>
                         <Link to="/signin">
                             <Button
-                                fullWidth
+                                type="submit"
+                                className={classes.submit}
                                 color="primary"
                                 autoFocus="autoFocus"
                                 variant="contained"
@@ -161,7 +168,7 @@ class Signup extends Component {
                         </Link>
                     </DialogActions>
                 </Dialog>
-            </div>
+            </form>
         )
     }
 }

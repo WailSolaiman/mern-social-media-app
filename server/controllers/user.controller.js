@@ -16,9 +16,6 @@ const create = (req, res, next) => {
     })
 }
 
-/**
- * Load user and append to req.
- */
 const userByID = (req, res, next, id) => {
     User.findById(id).exec((err, user) => {
         if (err || !user)
@@ -53,6 +50,7 @@ const update = (req, res, next) => {
     user.updated = Date.now()
     user.save(err => {
         if (err) {
+            console.log('update ERROR')
             return res.status(400).json({
                 error: errorHandler.getErrorMessage(err),
             })
@@ -77,6 +75,22 @@ const remove = (req, res, next) => {
     })
 }
 
+const createImage = (req, res, next) => {
+    let user = req.profile
+    user.image_name = req.body.imageName
+    user.image_data = req.file.path
+    user.save(err => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler.getErrorMessage(err),
+            })
+        }
+        user.hashed_password = undefined
+        user.salt = undefined
+        res.json(user)
+    })
+}
+
 export default {
     create,
     userByID,
@@ -84,4 +98,5 @@ export default {
     list,
     remove,
     update,
+    createImage,
 }
