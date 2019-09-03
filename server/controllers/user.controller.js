@@ -17,14 +17,17 @@ const create = (req, res, next) => {
 }
 
 const userByID = (req, res, next, id) => {
-    User.findById(id).exec((err, user) => {
-        if (err || !user)
-            return res.status('400').json({
-                error: 'User not found',
-            })
-        req.profile = user
-        next()
-    })
+    User.findById(id)
+        .populate('following', '_id name image_data')
+        .populate('followers', '_id name image_data')
+        .exec((err, user) => {
+            if (err || !user)
+                return res.status('400').json({
+                    error: 'User not found',
+                })
+            req.profile = user
+            next()
+        })
 }
 
 const read = (req, res) => {
@@ -41,7 +44,7 @@ const list = (req, res) => {
             })
         }
         res.json(users)
-    }).select('name email updated created')
+    }).select('name email image_data updated created')
 }
 
 const update = (req, res, next) => {
@@ -91,6 +94,89 @@ const createImage = (req, res, next) => {
     })
 }
 
+const addFollowing = (req, res, next) => {
+    User.findByIdAndUpdate(
+        req.body.userId,
+        { $push: { following: req.body.followId } },
+        (err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            next()
+        }
+    )
+}
+
+const addFollower = (req, res) => {
+    User.findByIdAndUpdate(
+        req.body.followId,
+        { $push: { followers: req.body.userId } },
+        { new: true }
+    )
+        .populate('following', '_id name image_data')
+        .populate('followers', '_id name image_data')
+        .exec((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            result.hashed_password = undefined
+            result.salt = undefined
+            console.log(result)
+            res.json(result)
+        })
+}
+
+const removeFollowing = (req, res, next) => {
+    User.findByIdAndUpdate(
+        req.body.userId,
+        { $pull: { following: req.body.unfollowId } },
+        (err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            next()
+        }
+    )
+}
+const removeFollower = (req, res) => {
+    User.findByIdAndUpdate(
+        req.body.unfollowId,
+        { $pull: { followers: req.body.userId } },
+        { new: true }
+    )
+        .populate('following', '_id name image_data')
+        .populate('followers', '_id name image_data')
+        .exec((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            result.hashed_password = undefined
+            result.salt = undefined
+            res.json(result)
+        })
+}
+
+const findPeople = (req, res) => {
+    let following = req.profile.following
+    following.push(req.profile._id)
+    User.find({ _id: { $nin: following } }, (err, users) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler.getErrorMessage(err),
+            })
+        }
+        res.json(users)
+    }).select('name')
+}
+
 export default {
     create,
     userByID,
@@ -99,4 +185,9 @@ export default {
     remove,
     update,
     createImage,
+    addFollowing,
+    addFollower,
+    removeFollowing,
+    removeFollower,
+    findPeople,
 }

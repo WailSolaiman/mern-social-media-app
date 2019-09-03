@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
@@ -25,6 +26,11 @@ const styles = theme => ({
         margin: `${theme.spacing(4)}px 0 ${theme.spacing(2)}px`,
         color: theme.palette.openTitle,
     },
+    bigAvatar: {
+        width: 60,
+        height: 60,
+        margin: 10,
+    },
 })
 
 class Users extends Component {
@@ -40,7 +46,7 @@ class Users extends Component {
                 this.setState({ users: response.data })
             })
             .catch(error => {
-                console.log(error)
+                console.log(error.response.data.error)
             })
     }
     render() {
@@ -51,16 +57,22 @@ class Users extends Component {
                     All Users
                 </Typography>
                 <List dense>
-                    {this.state.users.map((item, i) => {
+                    {this.state.users.map((user, i) => {
                         return (
-                            <Link to={'/user/' + item._id} key={i}>
+                            <Link to={'/user/' + user._id} key={i}>
                                 <ListItem button>
                                     <ListItemAvatar>
-                                        <Avatar>
-                                            <Person />
-                                        </Avatar>
+                                        <Avatar
+                                            src={
+                                                user.image_data
+                                                    ? '/' +
+                                                      slash(user.image_data)
+                                                    : ''
+                                            }
+                                            className={classes.bigAvatar}
+                                        />
                                     </ListItemAvatar>
-                                    <ListItemText primary={item.name} />
+                                    <ListItemText primary={user.name} />
                                     <ListItemSecondaryAction>
                                         <IconButton>
                                             <ArrowForward />

@@ -19,6 +19,22 @@ router
     .route('/api/image/:userId')
     .post(upload.single('imageData'), userCtrl.createImage)
 
+router
+    .route('/api/users/follow')
+    .post(authCtrl.requireSignin, userCtrl.addFollowing, userCtrl.addFollower)
+
+router
+    .route('/api/users/unfollow')
+    .post(
+        authCtrl.requireSignin,
+        userCtrl.removeFollowing,
+        userCtrl.removeFollower
+    )
+
+router
+    .route('/api/users/findpeople/:userId')
+    .get(authCtrl.requireSignin, userCtrl.findPeople)
+
 router.param('userId', userCtrl.userByID)
 
 export default router

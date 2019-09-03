@@ -26,7 +26,15 @@ class MainRouter extends Component {
                         path="/user/edit/:userId"
                         component={EditProfile}
                     />
-                    <Route path="/user/:userId" component={Profile} />
+                    <Route
+                        path={'/user/:userId'}
+                        render={props => (
+                            <Profile
+                                {...props}
+                                key={props.match.params.userId}
+                            />
+                        )}
+                    />
                 </Switch>
             </div>
         )

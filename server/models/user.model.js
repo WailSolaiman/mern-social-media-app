@@ -17,6 +17,8 @@ const UserSchema = new mongoose.Schema({
     image_data: {
         type: String,
     },
+    following: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
+    followers: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
     email: {
         type: String,
         trim: true,

@@ -47,4 +47,49 @@ const remove = (params, credentials) => {
     })
 }
 
-export { create, list, read, update, saveProfileImage, remove }
+const follow = (params, credentials, followId) => {
+    const data = JSON.stringify({ userId: params.userId, followId: followId })
+    return axios.post('/api/users/follow/', data, {
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + credentials.t,
+        },
+    })
+}
+
+const unfollow = (params, credentials, unfollowId) => {
+    const data = JSON.stringify({
+        userId: params.userId,
+        unfollowId: unfollowId,
+    })
+    return axios.post('/api/users/unfollow/', data, {
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + credentials.t,
+        },
+    })
+}
+
+const findPeople = (params, credentials) => {
+    return axios.get('/api/users/findpeople/' + params.userId, {
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + credentials.t,
+        },
+    })
+}
+
+export {
+    create,
+    list,
+    read,
+    update,
+    saveProfileImage,
+    remove,
+    follow,
+    unfollow,
+    findPeople,
+}

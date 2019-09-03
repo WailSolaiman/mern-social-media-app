@@ -19,6 +19,8 @@ import { Edit } from '@material-ui/icons'
 import auth from '../auth/auth-helper'
 import { read } from './api-user.js'
 import DeleteUser from './DeleteUser'
+import FollowProfileButton from './FollowProfileButton'
+import ProfileTabs from './ProfileTabs'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
@@ -39,13 +41,13 @@ const styles = theme => ({
 })
 
 class Profile extends Component {
-    constructor({ match }) {
-        super()
+    constructor(props) {
+        super(props)
         this.state = {
-            user: '',
+            user: { following: [], followers: [] },
             redirectToSignin: false,
+            following: false,
         }
-        this.match = match
     }
 
     init = userId => {
@@ -57,15 +59,46 @@ class Profile extends Component {
             { t: jwt.token }
         )
             .then(response => {
-                this.setState({ user: response.data })
+                let following = this.checkFollow(response.data)
+                this.setState({ user: response.data, following: following })
             })
             .catch(error => {
                 this.setState({ redirectToSignin: true })
             })
     }
 
-    componentDidMount = () => {
-        this.init(this.match.params.userId)
+    componentDidMount() {
+        this.init(this.props.match.params.userId)
+    }
+
+    checkFollow = user => {
+        const jwt = auth.isAuthenticated()
+        const match = user.followers.some(follower => {
+            return follower._id == jwt.user._id
+        })
+        return match
+    }
+
+    clickFollowButton = callApi => {
+        const jwt = auth.isAuthenticated()
+        callApi(
+            {
+                userId: jwt.user._id,
+            },
+            {
+                t: jwt.token,
+            },
+            this.state.user._id
+        )
+            .then(response => {
+                this.setState({
+                    user: response.data,
+                    following: !this.state.following,
+                })
+            })
+            .catch(error => {
+                this.setState({ error: error.response.data.error })
+            })
     }
 
     render() {
@@ -98,22 +131,25 @@ class Profile extends Component {
                             secondary={this.state.user.email}
                         />{' '}
                         {auth.isAuthenticated().user &&
-                            auth.isAuthenticated().user._id ==
-                                this.state.user._id && (
-                                <ListItemSecondaryAction>
-                                    <Link
-                                        to={'/user/edit/' + this.state.user._id}
+                        auth.isAuthenticated().user._id ==
+                            this.state.user._id ? (
+                            <ListItemSecondaryAction>
+                                <Link to={'/user/edit/' + this.state.user._id}>
+                                    <IconButton
+                                        aria-label="Edit"
+                                        color="primary"
                                     >
-                                        <IconButton
-                                            aria-label="Edit"
-                                            color="primary"
-                                        >
-                                            <Edit />
-                                        </IconButton>
-                                    </Link>
-                                    <DeleteUser userId={this.state.user._id} />
-                                </ListItemSecondaryAction>
-                            )}
+                                        <Edit />
+                                    </IconButton>
+                                </Link>
+                                <DeleteUser userId={this.state.user._id} />
+                            </ListItemSecondaryAction>
+                        ) : (
+                            <FollowProfileButton
+                                following={this.state.following}
+                                onButtonClick={this.clickFollowButton}
+                            />
+                        )}
                     </ListItem>
                     <Divider />
                     <ListItem>
@@ -128,6 +164,7 @@ class Profile extends Component {
                         />
                     </ListItem>
                 </List>
+                <ProfileTabs user={this.state.user} />
             </Paper>
         )
     }
