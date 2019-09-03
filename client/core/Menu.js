@@ -54,6 +54,11 @@ const Menu = withRouter(({ history }) => (
                             My Profile
                         </Button>
                     </Link>
+                    <Link to="/findpeople">
+                        <Button style={isActive(history, '/findpeople')}>
+                            Find People
+                        </Button>
+                    </Link>
                     <Button
                         color="inherit"
                         onClick={() => {

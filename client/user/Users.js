@@ -19,8 +19,10 @@ import { list } from './api-user.js'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
-        padding: theme.spacing(5),
-        margin: theme.spacing(5),
+        maxWidth: 600,
+        margin: 'auto',
+        padding: theme.spacing(3),
+        marginTop: theme.spacing(5),
     }),
     title: {
         margin: `${theme.spacing(4)}px 0 ${theme.spacing(2)}px`,

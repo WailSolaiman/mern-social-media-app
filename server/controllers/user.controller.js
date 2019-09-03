@@ -174,7 +174,7 @@ const findPeople = (req, res) => {
             })
         }
         res.json(users)
-    }).select('name')
+    }).select('name image_data')
 }
 
 export default {

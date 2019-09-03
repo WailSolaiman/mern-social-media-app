@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import slash from 'slash'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 import { findPeople, follow } from './api-user.js'
@@ -17,12 +18,14 @@ import {
     Snackbar,
     Typography,
 } from '@material-ui/core'
-import { ViewIcon } from '@material-ui/icons'
+import VisibilityIcon from '@material-ui/icons/Visibility'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
-        padding: theme.spacing(2),
-        margin: 0,
+        maxWidth: 600,
+        margin: 'auto',
+        padding: theme.spacing(3),
+        marginTop: theme.spacing(5),
     }),
     title: {
         margin: `${theme.spacing(3)}px ${theme.spacing(3)}px ${theme.spacing(
@@ -65,7 +68,7 @@ class FindPeople extends Component {
             }
         )
             .then(response => {
-                this.setState({ user: response.data })
+                this.setState({ users: response.data })
             })
             .catch(error => {
                 console.log(error.response.data.error)
@@ -118,8 +121,10 @@ class FindPeople extends Component {
                                         >
                                             <Avatar
                                                 src={
-                                                    '/api/users/photo/' +
-                                                    item._id
+                                                    item.image_data
+                                                        ? '/' +
+                                                          slash(item.image_data)
+                                                        : ''
                                                 }
                                             />
                                         </ListItemAvatar>
@@ -135,7 +140,7 @@ class FindPeople extends Component {
                                                         classes.viewButton
                                                     }
                                                 >
-                                                    <ViewIcon />
+                                                    <VisibilityIcon />
                                                 </IconButton>
                                             </Link>
                                             <Button
@@ -156,7 +161,6 @@ class FindPeople extends Component {
                             )
                         })}
                     </List>
-                    <ProfileTabs user={this.state.user} />
                 </Paper>
                 <Snackbar
                     anchorOrigin={{
