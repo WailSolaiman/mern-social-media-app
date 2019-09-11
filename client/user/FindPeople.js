@@ -25,14 +25,16 @@ const styles = theme => ({
         maxWidth: 600,
         margin: 'auto',
         padding: theme.spacing(3),
-        marginTop: theme.spacing(5),
+        marginTop: theme.spacing(10),
+        border: `1px solid ${theme.palette.secondary.light}`,
+        borderRadius: 0,
+        boxShadow: 'none',
     }),
     title: {
         margin: `${theme.spacing(3)}px ${theme.spacing(3)}px ${theme.spacing(
             3
         )}px`,
         color: theme.palette.openTitle,
-        fontSize: '1em',
     },
     avatar: {
         marginRight: theme.spacing(2),
@@ -108,7 +110,7 @@ class FindPeople extends Component {
         return (
             <div>
                 <Paper className={classes.root} elevation={4}>
-                    <Typography type="title" className={classes.title}>
+                    <Typography variant="h5" className={classes.title}>
                         Who to follow
                     </Typography>
                     <List>

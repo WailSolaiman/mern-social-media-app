@@ -1,0 +1,164 @@
+import Post from '../models/post.model'
+import errorHandler from './../helpers/dbErrorHandler'
+
+const create = (req, res) => {
+    let post = new Post(req.body)
+    post.postedBy = req.profile
+    post.save((err, result) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler.getErrorMessage(err),
+            })
+        }
+        res.json(result)
+    })
+}
+
+const listNewsFeed = (req, res) => {
+    let following = req.profile.following
+    following.push(req.profile._id)
+    Post.find({ postedBy: { $in: req.profile.following } })
+        .populate('comments.postedBy', '_id name image_data')
+        .populate('postedBy', '_id name image_data')
+        .sort('-created')
+        .exec((err, posts) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            res.json(posts)
+        })
+}
+
+const postByID = (req, res, next, id) => {
+    Post.findById(id)
+        .populate('postedBy', '_id name image_data')
+        .exec((err, post) => {
+            if (err || !post)
+                return res.status('400').json({
+                    error: 'Post not found',
+                })
+            req.post = post
+            next()
+        })
+}
+
+const listByUser = (req, res) => {
+    Post.find({ postedBy: req.profile._id })
+        .populate('comments.postedBy', '_id name image_data')
+        .populate('postedBy', '_id name image_data')
+        .sort('-created')
+        .exec((err, posts) => {
+            if (err) {
+                return res.status('400').json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            res.json(posts)
+        })
+}
+
+const like = (req, res) => {
+    Post.findByIdAndUpdate(
+        req.body.postId,
+        { $push: { likes: req.body.userId } },
+        { new: true }
+    ).exec((err, result) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler.getErrorMessage(err),
+            })
+        }
+        res.json(result)
+    })
+}
+
+const unlike = (req, res) => {
+    Post.findByIdAndUpdate(
+        req.body.postId,
+        { $pull: { likes: req.body.userId } },
+        { new: true }
+    ).exec((err, result) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler.getErrorMessage(err),
+            })
+        }
+        res.json(result)
+    })
+}
+
+const comment = (req, res) => {
+    let comment = req.body.comment
+    comment.postedBy = req.body.userId
+    Post.findByIdAndUpdate(
+        req.body.postId,
+        { $push: { comments: comment } },
+        { new: true, upsert: true }
+    )
+        .populate('postedBy', '_id name image_data')
+        .populate('comments.postedBy', '_id name image_data')
+        .exec((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            res.json(result)
+        })
+}
+
+const uncomment = (req, res) => {
+    let comment = req.body.comment
+    Post.findByIdAndUpdate(
+        req.body.postId,
+        { $pull: { comments: { _id: comment._id } } },
+        { new: true }
+    )
+        .populate('postedBy', '_id name image_data')
+        .populate('comments.postedBy', '_id name image_data')
+        .exec((err, result) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            res.json(result)
+        })
+}
+
+const remove = (req, res) => {
+    let post = req.post
+    post.remove((err, deletedPost) => {
+        if (err) {
+            return res.status(400).json({
+                error: errorHandler.getErrorMessage(err),
+            })
+        }
+        res.json(deletedPost)
+    })
+}
+
+const isPoster = (req, res, next) => {
+    let isPoster = req.post && req.auth && req.post.postedBy._id == req.auth._id
+    if (!isPoster) {
+        return res.status('403').json({
+            error: 'User is not authorized',
+        })
+    }
+    next()
+}
+
+export default {
+    create,
+    listNewsFeed,
+    postByID,
+    listByUser,
+    like,
+    unlike,
+    comment,
+    uncomment,
+    remove,
+    isPoster,
+}

@@ -8,7 +8,7 @@ import Signup from './user/Signup'
 import Signin from './auth/Signin'
 import Profile from './user/Profile'
 import EditProfile from './user/EditProfile'
-import FindPeople from './user/FindPeople'
+import Newsfeed from './post/Newsfeed'
 
 class MainRouter extends Component {
     constructor(props) {
@@ -27,7 +27,7 @@ class MainRouter extends Component {
                         path="/user/edit/:userId"
                         component={EditProfile}
                     />
-                    <PrivateRoute path="/findpeople" component={FindPeople} />
+                    <PrivateRoute path="/newsfeed" component={Newsfeed} />
                     <Route
                         path={'/user/:userId'}
                         render={props => (

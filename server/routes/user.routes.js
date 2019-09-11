@@ -17,7 +17,15 @@ router
 
 router
     .route('/api/image/:userId')
-    .post(upload.single('imageData'), userCtrl.createImage)
+    .post(
+        upload.single('imageData'),
+        authCtrl.requireSignin,
+        userCtrl.createImage
+    )
+
+router
+    .route('/api/image/avatar/:userId')
+    .get(authCtrl.requireSignin, userCtrl.getImage)
 
 router
     .route('/api/users/follow')

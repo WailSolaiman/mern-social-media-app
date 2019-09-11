@@ -18,7 +18,7 @@ const Menu = withRouter(({ history }) => (
     <AppBar position="static">
         <Toolbar>
             <Typography type="title" color="inherit">
-                MERN Skeleton
+                MERN Social Media
             </Typography>
             <Link to="/">
                 <IconButton aria-label="Home" style={isActive(history, '/')}>
@@ -54,9 +54,9 @@ const Menu = withRouter(({ history }) => (
                             My Profile
                         </Button>
                     </Link>
-                    <Link to="/findpeople">
-                        <Button style={isActive(history, '/findpeople')}>
-                            Find People
+                    <Link to="/newsfeed">
+                        <Button style={isActive(history, '/newsfeed')}>
+                            Newsfeed
                         </Button>
                     </Link>
                     <Button

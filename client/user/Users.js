@@ -1,37 +1,41 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
-    List,
-    ListItem,
-    ListItemAvatar,
-    ListItemSecondaryAction,
-    ListItemText,
-    Paper,
-    Avatar,
-    IconButton,
+    Container,
+    Grid,
+    Card,
+    CardActionArea,
+    CardActions,
+    CardContent,
+    CardHeader,
+    CardMedia,
+    Button,
     Typography,
 } from '@material-ui/core'
-import { ArrowForward, Person } from '@material-ui/icons'
-import { Link } from 'react-router-dom'
+
 import { list } from './api-user.js'
 
 const styles = theme => ({
-    root: theme.mixins.gutters({
-        maxWidth: 600,
-        margin: 'auto',
-        padding: theme.spacing(3),
-        marginTop: theme.spacing(5),
-    }),
-    title: {
-        margin: `${theme.spacing(4)}px 0 ${theme.spacing(2)}px`,
-        color: theme.palette.openTitle,
+    container: {
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(3),
     },
-    bigAvatar: {
-        width: 60,
-        height: 60,
-        margin: 10,
+    card: {
+        width: '100%',
+    },
+    media: {
+        height: 300,
+    },
+    link: {
+        textDecoration: 'none',
+    },
+    text: {
+        textAlign: 'center',
+        textTransform: 'uppercase',
+        color: `${theme.palette.secondary.light}`,
     },
 })
 
@@ -42,6 +46,7 @@ class Users extends Component {
             users: [],
         }
     }
+
     componentDidMount() {
         list()
             .then(response => {
@@ -51,41 +56,52 @@ class Users extends Component {
                 console.log(error.response.data.error)
             })
     }
+
     render() {
         const { classes } = this.props
         return (
-            <Paper className={classes.root} elevation={4}>
-                <Typography type="title" className={classes.title}>
-                    All Users
-                </Typography>
-                <List dense>
+            <Container maxWidth="lg" className={classes.container}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Typography variant="h2" gutterBottom>
+                            Users
+                        </Typography>
+                    </Grid>
                     {this.state.users.map((user, i) => {
                         return (
-                            <Link to={'/user/' + user._id} key={i}>
-                                <ListItem button>
-                                    <ListItemAvatar>
-                                        <Avatar
-                                            src={
-                                                user.image_data
-                                                    ? '/' +
-                                                      slash(user.image_data)
-                                                    : ''
-                                            }
-                                            className={classes.bigAvatar}
-                                        />
-                                    </ListItemAvatar>
-                                    <ListItemText primary={user.name} />
-                                    <ListItemSecondaryAction>
-                                        <IconButton>
-                                            <ArrowForward />
-                                        </IconButton>
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            </Link>
+                            <Grid item xs={12} sm={6} md={3} key={i}>
+                                <Link
+                                    to={'/user/' + user._id}
+                                    className={classes.link}
+                                >
+                                    <Card className={classes.card}>
+                                        <CardActionArea>
+                                            <CardMedia
+                                                className={classes.media}
+                                                image={
+                                                    user.image_data
+                                                        ? '/' +
+                                                          slash(user.image_data)
+                                                        : ''
+                                                }
+                                                title={user.name}
+                                            />
+                                            <CardContent>
+                                                <Typography
+                                                    variant="h6"
+                                                    className={classes.text}
+                                                >
+                                                    {user.name}
+                                                </Typography>
+                                            </CardContent>
+                                        </CardActionArea>
+                                    </Card>
+                                </Link>
+                            </Grid>
                         )
                     })}
-                </List>
-            </Paper>
+                </Grid>
+            </Container>
         )
     }
 }

@@ -4,12 +4,9 @@ import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
-    List,
-    ListItem,
-    ListItemAvatar,
-    ListItemSecondaryAction,
-    ListItemText,
-    Paper,
+    Container,
+    Grid,
+    Box,
     Avatar,
     IconButton,
     Divider,
@@ -18,25 +15,39 @@ import {
 import { Edit } from '@material-ui/icons'
 import auth from '../auth/auth-helper'
 import { read } from './api-user.js'
+import { listByUser } from '../post/api-post'
 import DeleteUser from './DeleteUser'
 import FollowProfileButton from './FollowProfileButton'
 import ProfileTabs from './ProfileTabs'
 
 const styles = theme => ({
-    root: theme.mixins.gutters({
-        maxWidth: 600,
-        margin: 'auto',
-        padding: theme.spacing(3),
-        marginTop: theme.spacing(5),
-    }),
+    container: {
+        marginTop: theme.spacing(3),
+        marginBottom: theme.spacing(3),
+    },
+    minHeight: {
+        minHeight: 200,
+    },
+    mediumAvatar: {
+        width: '100%',
+        height: 'auto',
+        marginTop: theme.spacing(2),
+        marginBottom: theme.spacing(2),
+    },
     title: {
         margin: `${theme.spacing(3)}px 0 ${theme.spacing(3)}px`,
         color: theme.palette.protectedTitle,
     },
-    bigAvatar: {
-        width: 60,
-        height: 60,
-        margin: 10,
+    commentDate: {
+        display: 'block',
+        color: 'gray',
+        fontSize: '0.8em',
+    },
+    flex: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
     },
 })
 
@@ -47,6 +58,7 @@ class Profile extends Component {
             user: { following: [], followers: [] },
             redirectToSignin: false,
             following: false,
+            posts: [],
         }
     }
 
@@ -61,6 +73,7 @@ class Profile extends Component {
             .then(response => {
                 let following = this.checkFollow(response.data)
                 this.setState({ user: response.data, following: following })
+                this.loadPosts(response.data._id)
             })
             .catch(error => {
                 this.setState({ redirectToSignin: true })
@@ -101,6 +114,25 @@ class Profile extends Component {
             })
     }
 
+    loadPosts = userId => {
+        const jwt = auth.isAuthenticated()
+        listByUser({ userId }, { t: jwt.token })
+            .then(response => {
+                //console.log('user all posts: ', response.data)
+                this.setState({ posts: response.data })
+            })
+            .catch(error => {
+                console.log(error.response.data.error)
+            })
+    }
+
+    removePost = post => {
+        const updatedPosts = this.state.posts
+        const index = updatedPosts.indexOf(post)
+        updatedPosts.splice(index, 1)
+        this.setState({ posts: updatedPosts })
+    }
+
     render() {
         const { classes } = this.props
         const redirectToSignin = this.state.redirectToSignin
@@ -109,63 +141,89 @@ class Profile extends Component {
         }
 
         return (
-            <Paper className={classes.root} elevation={4}>
-                <Typography type="title" className={classes.title}>
+            <Container maxWidth="lg" className={classes.container}>
+                <Typography variant="h2" gutterBottom>
                     Profile
                 </Typography>
-                <List dense>
-                    <ListItem>
-                        <ListItemAvatar>
-                            <Avatar
-                                src={
-                                    this.state.user.image_data
-                                        ? '/' +
-                                          slash(this.state.user.image_data)
-                                        : ''
-                                }
-                                className={classes.bigAvatar}
-                            />
-                        </ListItemAvatar>
-                        <ListItemText
-                            primary={this.state.user.name}
-                            secondary={this.state.user.email}
-                        />{' '}
-                        {auth.isAuthenticated().user &&
-                        auth.isAuthenticated().user._id ==
-                            this.state.user._id ? (
-                            <ListItemSecondaryAction>
-                                <Link to={'/user/edit/' + this.state.user._id}>
-                                    <IconButton
-                                        aria-label="Edit"
-                                        color="primary"
-                                    >
-                                        <Edit />
-                                    </IconButton>
-                                </Link>
-                                <DeleteUser userId={this.state.user._id} />
-                            </ListItemSecondaryAction>
-                        ) : (
-                            <FollowProfileButton
-                                following={this.state.following}
-                                onButtonClick={this.clickFollowButton}
-                            />
-                        )}
-                    </ListItem>
-                    <Divider />
-                    <ListItem>
-                        <ListItemText primary={this.state.user.about} />
-                    </ListItem>
-                    <ListItem>
-                        <ListItemText
-                            primary={
-                                'Joined: ' +
-                                new Date(this.state.user.created).toDateString()
+
+                <Grid container spacing={3} className={classes.minHeight}>
+                    <Grid item xs={12} sm={2}>
+                        <Avatar
+                            className={classes.mediumAvatar}
+                            alt={this.state.user.name}
+                            src={
+                                this.state.user.image_data
+                                    ? '/' + slash(this.state.user.image_data)
+                                    : ''
                             }
                         />
-                    </ListItem>
-                </List>
-                <ProfileTabs user={this.state.user} />
-            </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={10}>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} className={classes.flex}>
+                                <Box>
+                                    <Typography variant="h4" gutterBottom>
+                                        {this.state.user.name}
+                                    </Typography>
+                                    <Typography variant="h5" gutterBottom>
+                                        {this.state.user.email}
+                                    </Typography>
+                                </Box>
+                                <Box>
+                                    {auth.isAuthenticated().user &&
+                                    auth.isAuthenticated().user._id ==
+                                        this.state.user._id ? (
+                                        <div>
+                                            <Link
+                                                to={
+                                                    '/user/edit/' +
+                                                    this.state.user._id
+                                                }
+                                            >
+                                                <IconButton
+                                                    aria-label="Edit"
+                                                    color="primary"
+                                                >
+                                                    <Edit />
+                                                </IconButton>
+                                            </Link>
+                                            <DeleteUser
+                                                userId={this.state.user._id}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <FollowProfileButton
+                                            following={this.state.following}
+                                            onButtonClick={
+                                                this.clickFollowButton
+                                            }
+                                        />
+                                    )}
+                                </Box>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2" gutterBottom>
+                                    {this.state.user.about}
+                                </Typography>
+                                <Typography className={classes.commentDate}>
+                                    {'Joined: ' +
+                                        new Date(
+                                            this.state.user.created
+                                        ).toDateString()}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+                <Divider />
+
+                <ProfileTabs
+                    user={this.state.user}
+                    posts={this.state.posts}
+                    removePostUpdate={this.removePost}
+                />
+            </Container>
         )
     }
 }

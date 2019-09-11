@@ -33,8 +33,24 @@ const update = (params, credentials, user) => {
     })
 }
 
-const saveProfileImage = (userId, imageFormData) => {
-    return axios.post('/api/image/' + userId, imageFormData)
+const saveProfileImage = (userId, imageFormData, credentials) => {
+    return axios.post('/api/image/' + userId, imageFormData, {
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + credentials.t,
+        },
+    })
+}
+
+const getProfileImage = (params, credentials) => {
+    return axios.get('/api/image/avatar/' + params.userId, {
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + credentials.t,
+        },
+    })
 }
 
 const remove = (params, credentials) => {
@@ -88,6 +104,7 @@ export {
     read,
     update,
     saveProfileImage,
+    getProfileImage,
     remove,
     follow,
     unfollow,

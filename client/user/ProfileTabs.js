@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import FollowGrid from './FollowGrid'
 import { Tab, Tabs, AppBar, Typography } from '@material-ui/core'
+import FollowGrid from './FollowGrid'
+import PostList from '../post/PostList'
 
 class ProfileTabs extends Component {
     constructor(props) {
@@ -30,16 +31,25 @@ class ProfileTabs extends Component {
                         textColor="primary"
                         fullwidth="true"
                     >
+                        <Tab label="Posts" />
                         <Tab label="Following" />
                         <Tab label="Followers" />
                     </Tabs>
                 </AppBar>
                 {this.state.tab === 0 && (
                     <TabContainer>
-                        <FollowGrid people={this.props.user.following} />
+                        <PostList
+                            posts={this.props.posts}
+                            removeUpdate={this.props.removePostUpdate}
+                        />
                     </TabContainer>
                 )}
                 {this.state.tab === 1 && (
+                    <TabContainer>
+                        <FollowGrid people={this.props.user.following} />
+                    </TabContainer>
+                )}
+                {this.state.tab === 2 && (
                     <TabContainer>
                         <FollowGrid people={this.props.user.followers} />
                     </TabContainer>
@@ -51,6 +61,8 @@ class ProfileTabs extends Component {
 
 ProfileTabs.propTypes = {
     user: PropTypes.object.isRequired,
+    posts: PropTypes.array.isRequired,
+    removePostUpdate: PropTypes.func.isRequired,
 }
 
 const TabContainer = props => {

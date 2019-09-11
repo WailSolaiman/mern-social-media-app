@@ -7,6 +7,7 @@ const properties = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
+    useFindAndModify: false,
 }
 
 // Connection URL

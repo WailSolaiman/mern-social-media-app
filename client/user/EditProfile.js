@@ -134,9 +134,12 @@ class EditProfile extends Component {
     }
     handleChangePhoto = event => {
         let imageFormData = new FormData()
+        const jwt = auth.isAuthenticated()
         imageFormData.append('imageName', event.target.files[0].name)
         imageFormData.append('imageData', event.target.files[0])
-        saveProfileImage(this.match.params.userId, imageFormData)
+        saveProfileImage(this.match.params.userId, imageFormData, {
+            t: jwt.token,
+        })
             .then(response => {
                 this.setState({
                     imageName: response.data.image_name,

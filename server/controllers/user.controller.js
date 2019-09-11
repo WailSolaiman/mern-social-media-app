@@ -2,9 +2,9 @@ import User from '../models/user.model'
 import _ from 'lodash'
 import errorHandler from './../helpers/dbErrorHandler'
 
-const create = (req, res, next) => {
+const create = (req, res) => {
     const user = new User(req.body)
-    user.save((err, result) => {
+    user.save(err => {
         if (err) {
             return res.status(400).json({
                 error: errorHandler.getErrorMessage(err),
@@ -47,13 +47,12 @@ const list = (req, res) => {
     }).select('name email image_data updated created')
 }
 
-const update = (req, res, next) => {
+const update = (req, res) => {
     let user = req.profile
     user = _.extend(user, req.body)
     user.updated = Date.now()
     user.save(err => {
         if (err) {
-            console.log('update ERROR')
             return res.status(400).json({
                 error: errorHandler.getErrorMessage(err),
             })
@@ -64,7 +63,7 @@ const update = (req, res, next) => {
     })
 }
 
-const remove = (req, res, next) => {
+const remove = (req, res) => {
     let user = req.profile
     user.remove((err, deletedUser) => {
         if (err) {
@@ -78,7 +77,7 @@ const remove = (req, res, next) => {
     })
 }
 
-const createImage = (req, res, next) => {
+const createImage = (req, res) => {
     let user = req.profile
     user.image_name = req.body.imageName
     user.image_data = req.file.path
@@ -92,6 +91,10 @@ const createImage = (req, res, next) => {
         user.salt = undefined
         res.json(user)
     })
+}
+
+const getImage = (req, res) => {
+    return res.json(req.profile.image_data)
 }
 
 const addFollowing = (req, res, next) => {
@@ -125,7 +128,6 @@ const addFollower = (req, res) => {
             }
             result.hashed_password = undefined
             result.salt = undefined
-            console.log(result)
             res.json(result)
         })
 }
@@ -185,6 +187,7 @@ export default {
     remove,
     update,
     createImage,
+    getImage,
     addFollowing,
     addFollower,
     removeFollowing,

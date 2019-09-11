@@ -1,0 +1,59 @@
+    // componentDidMount() {
+    //     //this.getUserAvatar()
+    //     //this.loadComments(this.props.postId)
+    //     // const jwt = auth.isAuthenticated()
+    //     // getComments(
+    //     //     {
+    //     //         userId: jwt.user._id,
+    //     //     },
+    //     //     {
+    //     //         t: jwt.token,
+    //     //     },
+    //     //     this.props.postId
+    //     // )
+    //     //     .then(response => {
+    //     //         console.log('getComments: ', response.data)
+    //     //         //this.setState({ comments: response.data })
+    //     //     })
+    //     //     .catch(error => {
+    //     //         console.log(error.response.data.error)
+    //     //     })
+    // }
+
+
+
+
+
+       // getUserAvatar = () => {
+    //     const jwt = auth.isAuthenticated()
+    //     getProfileImage(
+    //         {
+    //             userId: jwt.user._id,
+    //         },
+    //         {
+    //             t: jwt.token,
+    //         }
+    //     )
+    //         .then(response => {
+    //             this.setState({ avatar: response.data })
+    //         })
+    //         .catch(error => {
+    //             console.log(error.response.data.error)
+    //         })
+    // }
+
+
+
+    // const getComments = (params, credentials, postId) => {
+//     const commentData = {
+//         userId: params.userId,
+//         postId: postId,
+//     }
+//     return axios.get('/api/posts/getcomments/', JSON.stringify(commentData), {
+//         headers: {
+//             Accept: 'application/json',
+//             'Content-Type': 'application/json',
+//             Authorization: 'Bearer ' + credentials.t,
+//         },
+//     })
+// }
