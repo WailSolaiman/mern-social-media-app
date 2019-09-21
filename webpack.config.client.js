@@ -27,6 +27,10 @@ const config = {
                 test: /\.(ttf|eot|svg|gif|jpeg|jpg|png)(\?[\s\S]+)?$/,
                 use: 'file-loader',
             },
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader'],
+            },
         ],
     },
     plugins: [

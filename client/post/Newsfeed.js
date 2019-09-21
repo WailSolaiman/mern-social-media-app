@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
+import update from 'immutability-helper'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import { Container, Grid, Typography, Divider } from '@material-ui/core'
 import NewPost from './NewPost'
 import PostList from './PostList'
 import FindPeople from '../user/FindPeople'
+import LoadingSpinners from '../core/LoadingSpinners'
 import auth from '../auth/auth-helper'
 import { listNewsFeed } from './api-post.js'
 
@@ -23,10 +25,11 @@ class Newsfeed extends Component {
         super(props)
         this.state = {
             posts: [],
+            loading: true,
         }
     }
 
-    loadPosts = () => {
+    componentDidMount() {
         const jwt = auth.isAuthenticated()
         listNewsFeed(
             {
@@ -37,33 +40,51 @@ class Newsfeed extends Component {
             }
         )
             .then(response => {
-                //console.log('response newsfeed: ', response.data)
-                this.setState({ posts: response.data })
+                this.setState({ posts: response.data, loading: false })
             })
             .catch(error => {
                 console.log(error.response.data.error)
             })
     }
 
-    componentDidMount() {
-        this.loadPosts()
+    updatesPostInfos = (postId, postComments, postLikes = null) => {
+        const updatedPostIndex = this.state.posts.findIndex(
+            post => post._id === postId
+        )
+        if (postComments) {
+            const newPosts = update(this.state.posts, {
+                [updatedPostIndex]: {
+                    comments: { $set: postComments },
+                },
+            })
+            this.setState({ posts: newPosts })
+        }
+        if (postLikes) {
+            const newPosts = update(this.state.posts, {
+                [updatedPostIndex]: {
+                    likes: { $set: postLikes },
+                },
+            })
+            this.setState({ posts: newPosts })
+        }
     }
 
     addPost = post => {
-        const updatedPosts = this.state.posts
-        updatedPosts.unshift(post)
-        this.setState({ posts: updatedPosts })
+        const posts = update(this.state.posts, { $unshift: [post] })
+        this.setState({ posts })
     }
 
     removePost = post => {
-        const updatedPosts = this.state.posts
-        const index = updatedPosts.indexOf(post)
-        updatedPosts.splice(index, 1)
-        this.setState({ posts: updatedPosts })
+        const index = this.state.posts.indexOf(post)
+        const posts = update(this.state.posts, { $splice: [[index, 1]] })
+        this.setState({ posts })
     }
 
     render() {
         const { classes } = this.props
+        if (this.state.loading) {
+            return <LoadingSpinners loading={this.state.loading} />
+        }
         return (
             <Container maxWidth="lg" className={classes.container}>
                 <Grid container spacing={6}>
@@ -76,6 +97,7 @@ class Newsfeed extends Component {
                         <Divider />
                         <PostList
                             removeUpdate={this.removePost}
+                            updatesPostInfos={this.updatesPostInfos}
                             posts={this.state.posts}
                         />
                     </Grid>

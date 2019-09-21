@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
-import slash from 'slash'
-import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import { findPeople, follow } from './api-user.js'
-import auth from '../auth/auth-helper'
+import PropTypes from 'prop-types'
+import slash from 'slash'
 import { withStyles } from '@material-ui/core'
 import {
     List,
@@ -16,9 +14,13 @@ import {
     Button,
     IconButton,
     Snackbar,
+    SnackbarContent,
     Typography,
 } from '@material-ui/core'
 import VisibilityIcon from '@material-ui/icons/Visibility'
+import LoadingSpinners from '../core/LoadingSpinners'
+import { findPeople, follow } from './api-user.js'
+import auth from '../auth/auth-helper'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
@@ -30,6 +32,9 @@ const styles = theme => ({
         borderRadius: 0,
         boxShadow: 'none',
     }),
+    cancelRoot: {
+        boxShadow: 'none',
+    },
     title: {
         margin: `${theme.spacing(3)}px ${theme.spacing(3)}px ${theme.spacing(
             3
@@ -43,10 +48,13 @@ const styles = theme => ({
         right: theme.spacing(2),
     },
     snack: {
-        color: theme.palette.protectedTitle,
+        color: 'white',
     },
     viewButton: {
         verticalAlign: 'middle',
+    },
+    SnackbarBackgroundColor: {
+        backgroundColor: theme.palette.snackpack,
     },
 })
 class FindPeople extends Component {
@@ -56,6 +64,7 @@ class FindPeople extends Component {
             users: [],
             open: false,
             followMessage: '',
+            loading: true,
         }
     }
 
@@ -70,7 +79,7 @@ class FindPeople extends Component {
             }
         )
             .then(response => {
-                this.setState({ users: response.data })
+                this.setState({ users: response.data, loading: false })
             })
             .catch(error => {
                 console.log(error.response.data.error)
@@ -102,19 +111,33 @@ class FindPeople extends Component {
         })
     }
 
-    handleRequestClose = (event, reason) => {
+    handleRequestClose = () => {
         this.setState({ open: false })
     }
+
     render() {
         const { classes } = this.props
+        if (this.state.loading) {
+            return <LoadingSpinners loading={this.state.loading} />
+        }
         return (
             <div>
-                <Paper className={classes.root} elevation={4}>
-                    <Typography variant="h5" className={classes.title}>
-                        Who to follow
-                    </Typography>
+                <Paper
+                    className={
+                        this.state.users.length > 0
+                            ? classes.root
+                            : classes.cancelRoot
+                    }
+                    elevation={4}
+                >
+                    {this.state.users.length > 0 && (
+                        <Typography variant="h5" className={classes.title}>
+                            Who to follow
+                        </Typography>
+                    )}
                     <List>
-                        {this.state.users.map((item, i) => {
+                        {this.state.users.map((user, i) => {
+                            const { _id, name, image_data } = user
                             return (
                                 <span key={i}>
                                     <ListItem>
@@ -123,18 +146,18 @@ class FindPeople extends Component {
                                         >
                                             <Avatar
                                                 src={
-                                                    item.image_data
+                                                    image_data
                                                         ? '/' +
-                                                          slash(item.image_data)
+                                                          slash(image_data)
                                                         : ''
                                                 }
                                             />
                                         </ListItemAvatar>
-                                        <ListItemText primary={item.name} />
+                                        <ListItemText primary={name} />
                                         <ListItemSecondaryAction
                                             className={classes.follow}
                                         >
-                                            <Link to={'/user/' + item._id}>
+                                            <Link to={'/user/' + _id}>
                                                 <IconButton
                                                     variant="contained"
                                                     color="secondary"
@@ -151,7 +174,7 @@ class FindPeople extends Component {
                                                 color="primary"
                                                 onClick={this.clickFollow.bind(
                                                     this,
-                                                    item,
+                                                    user,
                                                     i
                                                 )}
                                             >
@@ -177,7 +200,16 @@ class FindPeople extends Component {
                             {this.state.followMessage}
                         </span>
                     }
-                />
+                >
+                    <SnackbarContent
+                        className={classes.SnackbarBackgroundColor}
+                        message={
+                            <span className={classes.snack}>
+                                {this.state.followMessage}
+                            </span>
+                        }
+                    />
+                </Snackbar>
             </div>
         )
     }

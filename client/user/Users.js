@@ -8,15 +8,12 @@ import {
     Grid,
     Card,
     CardActionArea,
-    CardActions,
     CardContent,
-    CardHeader,
     CardMedia,
-    Button,
     Typography,
 } from '@material-ui/core'
-
 import { list } from './api-user.js'
+import LoadingSpinners from '../core/LoadingSpinners'
 
 const styles = theme => ({
     container: {
@@ -28,9 +25,6 @@ const styles = theme => ({
     },
     media: {
         height: 300,
-    },
-    link: {
-        textDecoration: 'none',
     },
     text: {
         textAlign: 'center',
@@ -44,13 +38,14 @@ class Users extends Component {
         super(props)
         this.state = {
             users: [],
+            loading: true,
         }
     }
 
     componentDidMount() {
         list()
             .then(response => {
-                this.setState({ users: response.data })
+                this.setState({ users: response.data, loading: false })
             })
             .catch(error => {
                 console.log(error.response.data.error)
@@ -59,6 +54,9 @@ class Users extends Component {
 
     render() {
         const { classes } = this.props
+        if (this.state.loading) {
+            return <LoadingSpinners loading={this.state.loading} />
+        }
         return (
             <Container maxWidth="lg" className={classes.container}>
                 <Grid container spacing={3}>
@@ -72,7 +70,7 @@ class Users extends Component {
                             <Grid item xs={12} sm={6} md={3} key={i}>
                                 <Link
                                     to={'/user/' + user._id}
-                                    className={classes.link}
+                                    style={{ textDecoration: 'none' }}
                                 >
                                     <Card className={classes.card}>
                                         <CardActionArea>

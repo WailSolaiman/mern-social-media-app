@@ -1,20 +1,9 @@
 import config from './../config/config'
+import conn from './connectDB'
 import app from './express'
-import mongoose from 'mongoose'
 
-// Database Connection Properties
-const properties = {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-}
-
-// Connection URL
-mongoose.Promise = global.Promise
-mongoose.connect(config.mongoUri, properties)
-mongoose.connection.on('error', () => {
-    throw new Error(`unable to connect to database: ${mongoUri}`)
+conn.on('error', () => {
+    throw new Error(`unable to connect to database: ${config.mongoUri}`)
 })
 
 app.listen(config.port, err => {

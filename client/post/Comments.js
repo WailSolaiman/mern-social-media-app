@@ -1,17 +1,18 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import bootbox from 'bootbox'
 import PropTypes from 'prop-types'
 import slash from 'slash'
 import { withStyles } from '@material-ui/core'
 import {
     Grid,
     Box,
+    ListItem,
     Typography,
     TextField,
     Avatar,
     Divider,
 } from '@material-ui/core'
-import MessageIcon from '@material-ui/icons/Message'
 import DeleteIcon from '@material-ui/icons/Delete'
 import auth from '../auth/auth-helper'
 import { comment, uncomment } from './api-post.js'
@@ -33,6 +34,9 @@ const styles = theme => ({
         marginTop: 0,
         marginBottom: 30,
     },
+    textField: {
+        width: '99%',
+    },
     flex: {
         display: 'flex',
         flexDirection: 'column',
@@ -40,6 +44,9 @@ const styles = theme => ({
     },
     divider: {
         marginTop: 5,
+    },
+    nested: {
+        paddingLeft: theme.spacing(4),
     },
 })
 
@@ -70,7 +77,6 @@ class Comments extends Component {
                 { text: this.state.text }
             )
                 .then(response => {
-                    console.log('response: ', response.data)
                     this.setState({
                         text: '',
                     })
@@ -83,23 +89,31 @@ class Comments extends Component {
     }
 
     deleteComment = comment => {
-        const jwt = auth.isAuthenticated()
-        uncomment(
-            {
-                userId: jwt.user._id,
+        bootbox.confirm({
+            size: 'small',
+            message: 'Delete selected Comment?',
+            callback: result => {
+                if (result) {
+                    const jwt = auth.isAuthenticated()
+                    uncomment(
+                        {
+                            userId: jwt.user._id,
+                        },
+                        {
+                            t: jwt.token,
+                        },
+                        this.props.postId,
+                        comment
+                    )
+                        .then(response => {
+                            this.props.updateComments(response.data.comments)
+                        })
+                        .catch(error => {
+                            console.log(error.response.data.error)
+                        })
+                }
             },
-            {
-                t: jwt.token,
-            },
-            this.props.postId,
-            comment
-        )
-            .then(response => {
-                this.props.updateComments(response.data.comments)
-            })
-            .catch(error => {
-                console.log(error.response.data.error)
-            })
+        })
     }
 
     render() {
@@ -108,8 +122,8 @@ class Comments extends Component {
             <div className={classes.margin}>
                 <TextField
                     id="standard-full-width"
+                    className={classes.textField}
                     label="Comment"
-                    className={classes.margin}
                     placeholder=""
                     helperText="Leave a comment!"
                     onKeyDown={this.addComment}
@@ -120,62 +134,66 @@ class Comments extends Component {
                 {this.props.comments.map((comment, i) => {
                     const { name, image_data } = comment.postedBy
                     return (
-                        <Grid
-                            container
-                            spacing={3}
-                            key={i}
-                            display="flex"
-                            flexdirection="column"
-                            alignItems="flex-start"
-                        >
-                            <Grid item xs={12} md={3}>
-                                <Avatar
-                                    className={classes.smallAvatar}
-                                    alt={name}
-                                    src={
-                                        image_data
-                                            ? '/' + slash(image_data)
-                                            : ''
-                                    }
-                                />
-                                <Box className={classes.flex}>
-                                    <Typography variant="subtitle1">
-                                        <Link
-                                            to={'/user/' + comment.postedBy._id}
-                                        >
-                                            {name}
-                                        </Link>
-                                    </Typography>
-                                    <Typography
-                                        variant="subtitle2"
-                                        gutterBottom
-                                        className={classes.commentDate}
-                                    >
-                                        {new Date(
-                                            comment.created
-                                        ).toDateString()}
-                                    </Typography>
-                                </Box>
-                            </Grid>
-                            <Grid item xs={11} md={8}>
-                                <Typography variant="h5" gutterBottom>
-                                    {comment.text}
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={1}>
-                                {auth.isAuthenticated().user._id ===
-                                    comment.postedBy._id && (
-                                    <DeleteIcon
-                                        onClick={() =>
-                                            this.deleteComment(comment)
+                        <ListItem key={i}>
+                            <Grid
+                                container
+                                spacing={3}
+                                display="flex"
+                                flexdirection="column"
+                                alignItems="flex-start"
+                            >
+                                <Grid item xs={12} md={3}>
+                                    <Avatar
+                                        className={classes.smallAvatar}
+                                        alt={name}
+                                        src={
+                                            image_data
+                                                ? '/' + slash(image_data)
+                                                : ''
                                         }
                                     />
-                                )}
+                                    <Box className={classes.flex}>
+                                        <Typography variant="subtitle1">
+                                            <Link
+                                                to={
+                                                    '/user/' +
+                                                    comment.postedBy._id
+                                                }
+                                            >
+                                                {name}
+                                            </Link>
+                                        </Typography>
+                                        <Typography
+                                            variant="subtitle2"
+                                            gutterBottom
+                                            className={classes.commentDate}
+                                        >
+                                            {new Date(
+                                                comment.created
+                                            ).toDateString()}
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={11} md={8}>
+                                    <Typography variant="h5" gutterBottom>
+                                        {comment.text}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={1}>
+                                    {auth.isAuthenticated().user._id ===
+                                        comment.postedBy._id && (
+                                        <DeleteIcon
+                                            onClick={() =>
+                                                this.deleteComment(comment)
+                                            }
+                                        />
+                                    )}
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <Divider className={classes.divider} />
+                                </Grid>
                             </Grid>
-                            <Grid item xs={12}>
-                                <Divider className={classes.divider} />
-                            </Grid>
-                        </Grid>
+                        </ListItem>
                     )
                 })}
             </div>

@@ -2,8 +2,10 @@ import React from 'react'
 import MainRouter from './MainRouter'
 import { BrowserRouter } from 'react-router-dom'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
-import { indigo, pink } from '@material-ui/core/colors'
+import { indigo, pink, green } from '@material-ui/core/colors'
 import { hot } from 'react-hot-loader/root'
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.min.js'
 
 // Create a theme instance.
 const theme = createMuiTheme({
@@ -20,6 +22,7 @@ const theme = createMuiTheme({
             dark: '#c60055',
             contrastText: '#000',
         },
+        snackpack: green['400'],
         openTitle: indigo['400'],
         protectedTitle: pink['400'],
         type: 'light',

@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import update from 'immutability-helper'
 import { Redirect, Link } from 'react-router-dom'
 import slash from 'slash'
 import PropTypes from 'prop-types'
@@ -18,6 +19,7 @@ import { read } from './api-user.js'
 import { listByUser } from '../post/api-post'
 import DeleteUser from './DeleteUser'
 import FollowProfileButton from './FollowProfileButton'
+import LoadingSpinners from '../core/LoadingSpinners'
 import ProfileTabs from './ProfileTabs'
 
 const styles = theme => ({
@@ -59,6 +61,7 @@ class Profile extends Component {
             redirectToSignin: false,
             following: false,
             posts: [],
+            loading: true,
         }
     }
 
@@ -72,10 +75,14 @@ class Profile extends Component {
         )
             .then(response => {
                 let following = this.checkFollow(response.data)
-                this.setState({ user: response.data, following: following })
+                this.setState({
+                    user: response.data,
+                    following: following,
+                    loading: false,
+                })
                 this.loadPosts(response.data._id)
             })
-            .catch(error => {
+            .catch(() => {
                 this.setState({ redirectToSignin: true })
             })
     }
@@ -118,7 +125,6 @@ class Profile extends Component {
         const jwt = auth.isAuthenticated()
         listByUser({ userId }, { t: jwt.token })
             .then(response => {
-                //console.log('user all posts: ', response.data)
                 this.setState({ posts: response.data })
             })
             .catch(error => {
@@ -127,10 +133,9 @@ class Profile extends Component {
     }
 
     removePost = post => {
-        const updatedPosts = this.state.posts
-        const index = updatedPosts.indexOf(post)
-        updatedPosts.splice(index, 1)
-        this.setState({ posts: updatedPosts })
+        const index = this.state.posts.indexOf(post)
+        const posts = update(this.state.posts, { $splice: [[index, 1]] })
+        this.setState({ posts })
     }
 
     render() {
@@ -139,7 +144,9 @@ class Profile extends Component {
         if (redirectToSignin) {
             return <Redirect to="/signin" />
         }
-
+        if (this.state.loading) {
+            return <LoadingSpinners loading={this.state.loading} />
+        }
         return (
             <Container maxWidth="lg" className={classes.container}>
                 <Typography variant="h2" gutterBottom>

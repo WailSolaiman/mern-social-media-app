@@ -1,11 +1,17 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import bootbox from 'bootbox'
 import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
     Grid,
     Box,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemIcon,
+    Collapse,
     Avatar,
     IconButton,
     Divider,
@@ -14,8 +20,11 @@ import {
 import DeleteIcon from '@material-ui/icons/Delete'
 import FavoriteIcon from '@material-ui/icons/Favorite'
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
+import MessageIcon from '@material-ui/icons/Message'
+import ExpandLess from '@material-ui/icons/ExpandLess'
+import ExpandMore from '@material-ui/icons/ExpandMore'
 import auth from '../auth/auth-helper'
-import { remove, like, unlike } from './api-post.js'
+import { remove, like, unlike, loadImage } from './api-post.js'
 import Comments from './Comments'
 
 const styles = theme => ({
@@ -52,28 +61,49 @@ class Post extends Component {
             like: false,
             likes: 0,
             comments: [],
+            isListOpen: false,
+            photoSrc: null,
         }
     }
 
-    componentDidMount = () => {
+    componentDidMount() {
         this.setState({
             like: this.checkLike(this.props.post.likes),
             likes: this.props.post.likes.length,
             comments: this.props.post.comments,
         })
+        //this.loadPostImage()
     }
 
-    // componentWillReceiveProps = props => {
-    //     this.setState({
-    //         like: this.checkLike(props.post.likes),
-    //         likes: props.post.likes.length,
-    //         //comments: props.post.comments,
-    //     })
-    // }
+    UNSAFE_componentWillReceiveProps(props) {
+        this.setState({
+            like: this.checkLike(props.post.likes),
+            likes: props.post.likes.length,
+            comments: props.post.comments,
+        })
+    }
+
+    loadPostImage = () => {
+        console.log('this.props.post.photoId: ', this.props.post.photoId)
+        const jwt = auth.isAuthenticated()
+        loadImage({ t: jwt.token }, this.props.post._id)
+            .then(response => {
+                const base64 = btoa(
+                    new Uint8Array(response.data).reduce(
+                        (data, byte) => data + String.fromCharCode(byte),
+                        ''
+                    )
+                )
+                const image = `data:jpg;base64,${base64}`
+                this.setState({ photoSrc: image })
+                console.log('response: ', response.data)
+            })
+            .catch(error => console.log(error.response))
+    }
 
     updateComments = comments => {
-        //console.log('comments updateComments: ', comments)
         this.setState({ comments })
+        this.props.updatesPostInfos(this.props.post._id, this.state.comments)
     }
 
     checkLike = likes => {
@@ -82,9 +112,10 @@ class Post extends Component {
         return match
     }
 
-    likePost = () => {
+    like = () => {
+        let callApi = this.state.like ? unlike : like
         const jwt = auth.isAuthenticated()
-        like(
+        callApi(
             {
                 userId: jwt.user._id,
             },
@@ -94,48 +125,15 @@ class Post extends Component {
             this.props.post._id
         )
             .then(response => {
-                //console.log(response.data)
-                const checkForUserRedundancy = response.data.likes.some(
-                    like => {
-                        return like._id === jwt.user._id
-                    }
+                this.setState({
+                    like: !this.state.like,
+                    likes: response.data.likes.length,
+                })
+                this.props.updatesPostInfos(
+                    this.props.post._id,
+                    null,
+                    response.data.likes
                 )
-                if (!checkForUserRedundancy) {
-                    this.setState({
-                        like: true,
-                        likes: response.data.likes.length,
-                    })
-                }
-            })
-            .catch(error => {
-                console.log(error.response.data.error)
-            })
-    }
-
-    unlikePost = () => {
-        const jwt = auth.isAuthenticated()
-        unlike(
-            {
-                userId: jwt.user._id,
-            },
-            {
-                t: jwt.token,
-            },
-            this.props.post._id
-        )
-            .then(response => {
-                //console.log(response.data)
-                const checkForUserRedundancy = response.data.likes.some(
-                    like => {
-                        return like._id === jwt.user._id
-                    }
-                )
-                if (!checkForUserRedundancy) {
-                    this.setState({
-                        like: false,
-                        likes: response.data.likes.length,
-                    })
-                }
             })
             .catch(error => {
                 console.log(error.response.data.error)
@@ -143,22 +141,33 @@ class Post extends Component {
     }
 
     deletePost = () => {
-        const jwt = auth.isAuthenticated()
-        remove(
-            {
-                postId: this.props.post._id,
+        bootbox.confirm({
+            size: 'small',
+            message: 'Delete selected Post?',
+            callback: result => {
+                if (result) {
+                    const jwt = auth.isAuthenticated()
+                    remove(
+                        {
+                            postId: this.props.post._id,
+                        },
+                        {
+                            t: jwt.token,
+                        }
+                    )
+                        .then(() => {
+                            this.props.onRemove(this.props.post)
+                        })
+                        .catch(error => {
+                            console.log(error.response.data.error)
+                        })
+                }
             },
-            {
-                t: jwt.token,
-            }
-        )
-            .then(() => {
-                this.props.onRemove(this.props.post)
-                //console.log(response.data)
-            })
-            .catch(error => {
-                console.log(error.response.data.error)
-            })
+        })
+    }
+
+    handleListClick = () => {
+        this.setState({ isListOpen: !this.state.isListOpen })
     }
 
     render() {
@@ -194,10 +203,10 @@ class Post extends Component {
                     </Typography>
                     {postedBy._id === auth.isAuthenticated().user._id && (
                         <IconButton
-                            onClick={this.deletePost}
+                            onClick={() => this.deletePost()}
                             className={classes.buttonCenter}
                         >
-                            <DeleteIcon />
+                            <DeleteIcon color="secondary" />
                         </IconButton>
                     )}
                 </Grid>
@@ -211,6 +220,20 @@ class Post extends Component {
                             >
                                 {text}
                             </Typography>
+
+                            <Box>
+                                <button
+                                    color="primary"
+                                    onClick={() => this.loadPostImage()}
+                                >
+                                    Load Image
+                                </button>
+                                {this.state.photoSrc ? (
+                                    <img src={this.state.photoSrc} />
+                                ) : (
+                                    <span></span>
+                                )}
+                            </Box>
                         </Grid>
                         <Grid item xs={12}>
                             <Box
@@ -220,7 +243,7 @@ class Post extends Component {
                             >
                                 {this.state.like ? (
                                     <IconButton
-                                        onClick={this.unlikePost}
+                                        onClick={this.like}
                                         aria-label="Like"
                                         color="secondary"
                                     >
@@ -228,7 +251,7 @@ class Post extends Component {
                                     </IconButton>
                                 ) : (
                                     <IconButton
-                                        onClick={this.likePost}
+                                        onClick={this.like}
                                         aria-label="Unlike"
                                         color="secondary"
                                     >
@@ -240,12 +263,39 @@ class Post extends Component {
                                 </Typography>
                             </Box>
                         </Grid>
-                        <Divider />
-                        <Comments
-                            postId={_id}
-                            comments={this.state.comments}
-                            updateComments={this.updateComments}
-                        />
+                        <Grid item xs={12}>
+                            <Divider />
+                            <ListItem
+                                button
+                                onClick={() => this.handleListClick()}
+                            >
+                                <ListItemIcon>
+                                    <MessageIcon color="secondary" />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="Leave a comment!"
+                                    secondary={`${this.state.comments.length} Comments`}
+                                />
+                                {this.state.isListOpen ? (
+                                    <ExpandLess />
+                                ) : (
+                                    <ExpandMore />
+                                )}
+                            </ListItem>
+                            <Collapse
+                                in={this.state.isListOpen}
+                                timeout="auto"
+                                unmountOnExit
+                            >
+                                <List component="div" disablePadding>
+                                    <Comments
+                                        postId={_id}
+                                        comments={this.state.comments}
+                                        updateComments={this.updateComments}
+                                    />
+                                </List>
+                            </Collapse>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>
@@ -257,6 +307,7 @@ Post.propTypes = {
     classes: PropTypes.object.isRequired,
     post: PropTypes.object.isRequired,
     onRemove: PropTypes.func.isRequired,
+    updatesPostInfos: PropTypes.func,
 }
 
 export default withStyles(styles)(Post)

@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import ImageUploader from 'react-images-upload'
 import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
@@ -48,9 +49,10 @@ class NewPost extends Component {
         super(props)
         this.state = {
             text: '',
-            photo: '',
+            photoId: '',
             error: '',
             user: {},
+            pictures: [],
         }
     }
 
@@ -58,7 +60,6 @@ class NewPost extends Component {
         const jwt = auth.isAuthenticated()
         read({ userId: jwt.user._id }, { t: jwt.token })
             .then(response => {
-                //console.log(response.data)
                 this.setState({ user: response.data })
             })
             .catch(error => {
@@ -67,30 +68,37 @@ class NewPost extends Component {
     }
 
     handleChangeText = event => {
-        //console.log('text ', event.target.value)
         this.setState({ text: event.target.value })
     }
 
     handleChangePhoto = event => {
-        //console.log('photo ', event.target.files[0])
         this.setState({ photo: event.target.files[0] })
     }
 
     clickPost = () => {
         const jwt = auth.isAuthenticated()
-        const newPost = {
-            text: this.state.text,
-        }
-        create({ userId: jwt.user._id }, { t: jwt.token }, newPost)
+        let bodyFormData = new FormData()
+        bodyFormData.set('text', this.state.text)
+        bodyFormData.set('imageName', this.state.photo.name)
+        bodyFormData.append('imageData', this.state.photo)
+
+        create({ userId: jwt.user._id }, { t: jwt.token }, bodyFormData)
             .then(response => {
+                console.log('response.data: ', response.data)
                 this.setState({ text: '', photo: '' })
                 this.props.addUpdate(response.data)
-                //console.log(response.data)
             })
             .catch(error => {
                 this.setState({ error: error.response.data.error })
                 console.log(error.response.data.error)
             })
+    }
+
+    onDrop = picture => {
+        console.log(picture)
+        this.setState({
+            pictures: this.state.pictures.concat(picture),
+        })
     }
 
     render() {
@@ -112,20 +120,30 @@ class NewPost extends Component {
                     <Grid container spacing={3}>
                         <Grid item xs={12}>
                             <TextField
-                                placeholder="Share your thoughts ..."
+                                placeholder={`Share your thoughts ${this.state.user.name}!`}
                                 multiline
                                 rows="5"
                                 value={this.state.text}
-                                onChange={this.handleChangeText}
+                                onChange={event => this.handleChangeText(event)}
                                 className={classes.textField}
                                 margin="normal"
                             />
                             <input
-                                accept="image/*"
-                                onChange={this.handleChangePhoto}
-                                className={classes.input}
                                 id="icon-button-file"
+                                className={classes.input}
+                                name="imageData"
                                 type="file"
+                                accept="image/*"
+                                onChange={event =>
+                                    this.handleChangePhoto(event)
+                                }
+                            />
+                            <ImageUploader
+                                withIcon={true}
+                                buttonText="Choose images"
+                                onChange={this.onDrop}
+                                imgExtension={['.jpg', '.gif', '.png', '.gif']}
+                                maxFileSize={5242880}
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -158,9 +176,9 @@ class NewPost extends Component {
                                     this.state.text === '' ||
                                     this.state.text.length < 5
                                 }
-                                onClick={this.clickPost}
+                                onClick={() => this.clickPost()}
                             >
-                                Post your comment!
+                                Post
                             </Button>
                         </Grid>
                     </Grid>
