@@ -33,23 +33,29 @@ const update = (params, credentials, user) => {
     })
 }
 
-const saveProfileImage = (userId, imageFormData, credentials) => {
-    return axios.post('/api/image/' + userId, imageFormData, {
+const saveProfileImage = (params, imageFormData, credentials) => {
+    return axios({
+        method: 'post',
+        url: `/api/image/${params.userId}`,
+        data: imageFormData,
         headers: {
             Accept: 'application/json',
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
             Authorization: 'Bearer ' + credentials.t,
         },
     })
 }
 
 const getProfileImage = (params, credentials) => {
-    return axios.get('/api/image/avatar/' + params.userId, {
+    return axios({
+        method: 'get',
+        url: `/api/image/avatar/${params.userId}`,
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: 'Bearer ' + credentials.t,
         },
+        responseType: 'arraybuffer',
     })
 }
 

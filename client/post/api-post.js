@@ -1,34 +1,17 @@
 import axios from 'axios'
 
-const create = (params, credentials, bodyFormData) => {
+const create = (params, credentials, postData) => {
     return axios({
         method: 'post',
         url: `/api/posts/new/${params.userId}`,
-        data: bodyFormData,
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'multipart/form-data',
-            Authorization: 'Bearer ' + credentials.t,
-        },
-    })
-}
-
-const loadImage = (credentials, postId) => {
-    return axios({
-        method: 'get',
-        url: `/api/posts/image/${postId}`,
+        data: postData,
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
             Authorization: 'Bearer ' + credentials.t,
         },
-        responseType: 'arraybuffer',
     })
 }
-
-// const loadImage = photoId => {
-//     return axios.get('/api/posts/images/', { photoId })
-// }
 
 const listNewsFeed = (params, credentials) => {
     return axios.get('/api/posts/feed/' + params.userId, {
@@ -120,7 +103,6 @@ const remove = (params, credentials) => {
 
 export {
     create,
-    loadImage,
     listNewsFeed,
     listByUser,
     like,

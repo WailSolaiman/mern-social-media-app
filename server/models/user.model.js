@@ -11,11 +11,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    image_name: {
-        type: String,
-        default: 'none',
-    },
-    image_data: {
+    photoId: {
         type: String,
     },
     following: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],

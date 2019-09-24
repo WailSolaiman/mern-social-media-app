@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import bootbox from 'bootbox'
-import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
@@ -24,13 +23,14 @@ import MessageIcon from '@material-ui/icons/Message'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
 import auth from '../auth/auth-helper'
-import { remove, like, unlike, loadImage } from './api-post.js'
+import { remove, like, unlike } from './api-post.js'
+import { getProfileImage } from '../user/api-user'
 import Comments from './Comments'
 
 const styles = theme => ({
     mediumAvatar: {
-        width: '75%',
-        height: 'auto',
+        width: '75px',
+        height: '75px',
         marginLeft: 'auto',
         marginRight: 'auto',
         marginTop: theme.spacing(2),
@@ -62,7 +62,7 @@ class Post extends Component {
             likes: 0,
             comments: [],
             isListOpen: false,
-            photoSrc: null,
+            photoSrc: '',
         }
     }
 
@@ -72,7 +72,7 @@ class Post extends Component {
             likes: this.props.post.likes.length,
             comments: this.props.post.comments,
         })
-        //this.loadPostImage()
+        this.loadUserImage()
     }
 
     UNSAFE_componentWillReceiveProps(props) {
@@ -81,24 +81,6 @@ class Post extends Component {
             likes: props.post.likes.length,
             comments: props.post.comments,
         })
-    }
-
-    loadPostImage = () => {
-        console.log('this.props.post.photoId: ', this.props.post.photoId)
-        const jwt = auth.isAuthenticated()
-        loadImage({ t: jwt.token }, this.props.post._id)
-            .then(response => {
-                const base64 = btoa(
-                    new Uint8Array(response.data).reduce(
-                        (data, byte) => data + String.fromCharCode(byte),
-                        ''
-                    )
-                )
-                const image = `data:jpg;base64,${base64}`
-                this.setState({ photoSrc: image })
-                console.log('response: ', response.data)
-            })
-            .catch(error => console.log(error.response))
     }
 
     updateComments = comments => {
@@ -170,6 +152,25 @@ class Post extends Component {
         this.setState({ isListOpen: !this.state.isListOpen })
     }
 
+    loadUserImage = () => {
+        const jwt = auth.isAuthenticated()
+        getProfileImage(
+            { userId: this.props.post.postedBy._id },
+            { t: jwt.token }
+        )
+            .then(response => {
+                const base64 = btoa(
+                    new Uint8Array(response.data).reduce(
+                        (data, byte) => data + String.fromCharCode(byte),
+                        ''
+                    )
+                )
+                const image = `data:jpg;base64,${base64}`
+                this.setState({ photoSrc: image })
+            })
+            .catch(error => console.log(error.response))
+    }
+
     render() {
         const { classes } = this.props
         const { _id, text, created, postedBy } = this.props.post
@@ -179,11 +180,7 @@ class Post extends Component {
                     <Avatar
                         className={classes.mediumAvatar}
                         alt={postedBy.name}
-                        src={
-                            postedBy.image_data
-                                ? '/' + slash(postedBy.image_data)
-                                : ''
-                        }
+                        src={this.state.photoSrc}
                     />
                     <Typography
                         variant="subtitle1"
@@ -220,20 +217,6 @@ class Post extends Component {
                             >
                                 {text}
                             </Typography>
-
-                            <Box>
-                                <button
-                                    color="primary"
-                                    onClick={() => this.loadPostImage()}
-                                >
-                                    Load Image
-                                </button>
-                                {this.state.photoSrc ? (
-                                    <img src={this.state.photoSrc} />
-                                ) : (
-                                    <span></span>
-                                )}
-                            </Box>
                         </Grid>
                         <Grid item xs={12}>
                             <Box

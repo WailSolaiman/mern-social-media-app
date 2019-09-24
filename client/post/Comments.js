@@ -1,21 +1,11 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import bootbox from 'bootbox'
 import PropTypes from 'prop-types'
-import slash from 'slash'
 import { withStyles } from '@material-ui/core'
-import {
-    Grid,
-    Box,
-    ListItem,
-    Typography,
-    TextField,
-    Avatar,
-    Divider,
-} from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
+import { TextField } from '@material-ui/core'
 import auth from '../auth/auth-helper'
 import { comment, uncomment } from './api-post.js'
+import Comment from './Comment'
 
 const styles = theme => ({
     smallAvatar: {
@@ -132,68 +122,12 @@ class Comments extends Component {
                     onChange={this.handleChangeText}
                 />
                 {this.props.comments.map((comment, i) => {
-                    const { name, image_data } = comment.postedBy
                     return (
-                        <ListItem key={i}>
-                            <Grid
-                                container
-                                spacing={3}
-                                display="flex"
-                                flexdirection="column"
-                                alignItems="flex-start"
-                            >
-                                <Grid item xs={12} md={3}>
-                                    <Avatar
-                                        className={classes.smallAvatar}
-                                        alt={name}
-                                        src={
-                                            image_data
-                                                ? '/' + slash(image_data)
-                                                : ''
-                                        }
-                                    />
-                                    <Box className={classes.flex}>
-                                        <Typography variant="subtitle1">
-                                            <Link
-                                                to={
-                                                    '/user/' +
-                                                    comment.postedBy._id
-                                                }
-                                            >
-                                                {name}
-                                            </Link>
-                                        </Typography>
-                                        <Typography
-                                            variant="subtitle2"
-                                            gutterBottom
-                                            className={classes.commentDate}
-                                        >
-                                            {new Date(
-                                                comment.created
-                                            ).toDateString()}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
-                                <Grid item xs={11} md={8}>
-                                    <Typography variant="h5" gutterBottom>
-                                        {comment.text}
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={1}>
-                                    {auth.isAuthenticated().user._id ===
-                                        comment.postedBy._id && (
-                                        <DeleteIcon
-                                            onClick={() =>
-                                                this.deleteComment(comment)
-                                            }
-                                        />
-                                    )}
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <Divider className={classes.divider} />
-                                </Grid>
-                            </Grid>
-                        </ListItem>
+                        <Comment
+                            comment={comment}
+                            deleteComment={this.deleteComment}
+                            key={i}
+                        />
                     )
                 })}
             </div>

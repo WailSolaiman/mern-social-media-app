@@ -1,23 +1,13 @@
 import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import slash from 'slash'
 import { withStyles } from '@material-ui/core'
 import {
     List,
-    ListItem,
-    ListItemAvatar,
-    ListItemSecondaryAction,
-    ListItemText,
     Paper,
-    Avatar,
-    Button,
-    IconButton,
     Snackbar,
     SnackbarContent,
     Typography,
 } from '@material-ui/core'
-import VisibilityIcon from '@material-ui/icons/Visibility'
 import LoadingSpinners from '../core/LoadingSpinners'
 import { findPeople, follow } from './api-user.js'
 import auth from '../auth/auth-helper'
@@ -41,22 +31,14 @@ const styles = theme => ({
         )}px`,
         color: theme.palette.openTitle,
     },
-    avatar: {
-        marginRight: theme.spacing(2),
-    },
-    follow: {
-        right: theme.spacing(2),
-    },
     snack: {
         color: 'white',
-    },
-    viewButton: {
-        verticalAlign: 'middle',
     },
     SnackbarBackgroundColor: {
         backgroundColor: theme.palette.snackpack,
     },
 })
+
 class FindPeople extends Component {
     constructor(props) {
         super(props)
@@ -137,53 +119,7 @@ class FindPeople extends Component {
                     )}
                     <List>
                         {this.state.users.map((user, i) => {
-                            const { _id, name, image_data } = user
-                            return (
-                                <span key={i}>
-                                    <ListItem>
-                                        <ListItemAvatar
-                                            className={classes.avatar}
-                                        >
-                                            <Avatar
-                                                src={
-                                                    image_data
-                                                        ? '/' +
-                                                          slash(image_data)
-                                                        : ''
-                                                }
-                                            />
-                                        </ListItemAvatar>
-                                        <ListItemText primary={name} />
-                                        <ListItemSecondaryAction
-                                            className={classes.follow}
-                                        >
-                                            <Link to={'/user/' + _id}>
-                                                <IconButton
-                                                    variant="contained"
-                                                    color="secondary"
-                                                    className={
-                                                        classes.viewButton
-                                                    }
-                                                >
-                                                    <VisibilityIcon />
-                                                </IconButton>
-                                            </Link>
-                                            <Button
-                                                aria-label="Follow"
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={this.clickFollow.bind(
-                                                    this,
-                                                    user,
-                                                    i
-                                                )}
-                                            >
-                                                Follow
-                                            </Button>
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                </span>
-                            )
+                            return <FindPerson user={user} key={i} />
                         })}
                     </List>
                 </Paper>

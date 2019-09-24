@@ -1,6 +1,9 @@
 import User from '../models/user.model'
 import _ from 'lodash'
 import errorHandler from './../helpers/dbErrorHandler'
+import { gridFSBucketUser } from '../../config/gridFSBucketUser'
+import { ObjectID } from 'mongodb'
+import { Readable } from 'stream'
 
 const create = (req, res) => {
     const user = new User(req.body)
@@ -18,8 +21,8 @@ const create = (req, res) => {
 
 const userByID = (req, res, next, id) => {
     User.findById(id)
-        .populate('following', '_id name image_data')
-        .populate('followers', '_id name image_data')
+        .populate('following', '_id name')
+        .populate('followers', '_id name')
         .exec((err, user) => {
             if (err || !user)
                 return res.status('400').json({
@@ -44,7 +47,7 @@ const list = (req, res) => {
             })
         }
         res.json(users)
-    }).select('name email image_data updated created')
+    }).select('name email updated created')
 }
 
 const update = (req, res) => {
@@ -77,24 +80,53 @@ const remove = (req, res) => {
     })
 }
 
-const createImage = (req, res) => {
+const createAvatarImage = (req, res) => {
     let user = req.profile
-    user.image_name = req.body.imageName
-    user.image_data = req.file.path
-    user.save(err => {
-        if (err) {
-            return res.status(400).json({
-                error: errorHandler.getErrorMessage(err),
-            })
-        }
-        user.hashed_password = undefined
-        user.salt = undefined
-        res.json(user)
+    const readableTrackStream = new Readable()
+    readableTrackStream.push(req.file.buffer)
+    readableTrackStream.push(null)
+    let uploadStream = gridFSBucketUser.openUploadStream(req.body.imageName)
+    readableTrackStream.pipe(uploadStream)
+    user.photoId = uploadStream.id
+    uploadStream.on('error', () => {
+        return res.status(500).json({ message: 'Error uploading file' })
+    })
+    uploadStream.on('finish', () => {
+        user.save(err => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler.getErrorMessage(err),
+                })
+            }
+            user.hashed_password = undefined
+            user.salt = undefined
+            return res.json(user)
+        })
     })
 }
 
-const getImage = (req, res) => {
-    return res.json(req.profile.image_data)
+const getAvatarImage = (req, res) => {
+    let user = req.profile
+    let photoId
+    try {
+        photoId = new ObjectID(user.photoId)
+    } catch (err) {
+        return res.status(400).json({
+            message: 'Invalid postID',
+        })
+    }
+    res.set('Content-Type', 'image/jpg')
+    res.set('Accept-Ranges', 'bytes')
+    let downloadStream = gridFSBucketUser.openDownloadStream(photoId)
+    downloadStream.on('data', chunk => {
+        res.write(chunk)
+    })
+    downloadStream.on('error', () => {
+        res.sendStatus(404)
+    })
+    downloadStream.on('end', () => {
+        res.end()
+    })
 }
 
 const addFollowing = (req, res, next) => {
@@ -118,8 +150,8 @@ const addFollower = (req, res) => {
         { $push: { followers: req.body.userId } },
         { new: true }
     )
-        .populate('following', '_id name image_data')
-        .populate('followers', '_id name image_data')
+        .populate('following', '_id name')
+        .populate('followers', '_id name')
         .exec((err, result) => {
             if (err) {
                 return res.status(400).json({
@@ -152,8 +184,8 @@ const removeFollower = (req, res) => {
         { $pull: { followers: req.body.userId } },
         { new: true }
     )
-        .populate('following', '_id name image_data')
-        .populate('followers', '_id name image_data')
+        .populate('following', '_id name')
+        .populate('followers', '_id name')
         .exec((err, result) => {
             if (err) {
                 return res.status(400).json({
@@ -176,7 +208,7 @@ const findPeople = (req, res) => {
             })
         }
         res.json(users)
-    }).select('name image_data')
+    }).select('name')
 }
 
 export default {
@@ -186,8 +218,8 @@ export default {
     list,
     remove,
     update,
-    createImage,
-    getImage,
+    createAvatarImage,
+    getAvatarImage,
     addFollowing,
     addFollower,
     removeFollowing,

@@ -1,18 +1,13 @@
 import express from 'express'
-import multer from 'multer'
 import authCtrl from '../controllers/auth.controller'
 import userCtrl from '../controllers/user.controller'
 import postCtrl from '../controllers/post.controller'
-//import { upload } from '../../config/multer'
-//import { upload } from '../../config/multer2'
 
 const router = express.Router()
-//const storage = multer.memoryStorage()
-const upload = multer({ storage: multer.memoryStorage() })
 
 router
     .route('/api/posts/new/:userId')
-    .post(authCtrl.requireSignin, upload.single('imageData'), postCtrl.create)
+    .post(authCtrl.requireSignin, postCtrl.create)
 
 router
     .route('/api/posts/feed/:userId')
@@ -33,10 +28,6 @@ router.route('/api/posts/comment').put(authCtrl.requireSignin, postCtrl.comment)
 router
     .route('/api/posts/uncomment')
     .put(authCtrl.requireSignin, postCtrl.uncomment)
-
-router
-    .route('/api/posts/image/:postId')
-    .get(authCtrl.requireSignin, postCtrl.getPostImage)
 
 router.param('userId', userCtrl.userByID)
 router.param('postId', postCtrl.postByID)

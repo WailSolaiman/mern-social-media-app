@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
-import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
@@ -14,7 +13,8 @@ import {
     Typography,
 } from '@material-ui/core'
 import auth from './../auth/auth-helper'
-import { read, update, saveProfileImage } from './api-user.js'
+import { read, update, saveProfileImage, getProfileImage } from './api-user.js'
+import LoadingSpinners from '../core/LoadingSpinners'
 
 const styles = theme => ({
     card: {
@@ -41,8 +41,8 @@ const styles = theme => ({
         marginBottom: theme.spacing(2),
     },
     bigAvatar: {
-        width: 60,
-        height: 60,
+        width: 150,
+        height: 150,
         margin: 'auto',
     },
     input: {
@@ -62,14 +62,20 @@ class EditProfile extends Component {
             email: '',
             password: '',
             about: '',
-            imageName: '',
-            imageData: '',
+            photoId: '',
+            photoSrc: '',
             redirectToProfile: false,
             error: '',
+            loading: true,
         }
         this.match = match
     }
     componentDidMount = () => {
+        this.readUserInfo()
+        this.loadUserImage()
+    }
+
+    readUserInfo = () => {
         const jwt = auth.isAuthenticated()
         read(
             {
@@ -83,14 +89,73 @@ class EditProfile extends Component {
                     name: response.data.name,
                     email: response.data.email,
                     about: response.data.about,
-                    imageName: response.data.image_name,
-                    imageData: response.data.image_data,
+                    loading: false,
                 })
             })
             .catch(error => {
                 this.setState({ error: error.response.data.error })
             })
     }
+
+    handleChangeName = event => {
+        this.setState({ name: event.target.value })
+    }
+
+    handleChangeAbout = event => {
+        this.setState({ about: event.target.value })
+    }
+
+    handleChangeEmail = event => {
+        this.setState({ email: event.target.value })
+    }
+
+    handleChangePassword = event => {
+        this.setState({ password: event.target.value })
+    }
+
+    handleChangePhoto = event => {
+        let imageFormData = new FormData()
+        imageFormData.set('imageName', event.target.files[0].name)
+        imageFormData.append('imageData', event.target.files[0])
+        this.saveUserImage(imageFormData)
+    }
+
+    saveUserImage = imageFormData => {
+        const jwt = auth.isAuthenticated()
+        saveProfileImage({ userId: this.state.userId }, imageFormData, {
+            t: jwt.token,
+        })
+            .then(response => {
+                this.setState(
+                    () => {
+                        return {
+                            photoId: response.data.photoId,
+                        }
+                    },
+                    () => {
+                        this.loadUserImage()
+                    }
+                )
+            })
+            .catch(error => console.log(error))
+    }
+
+    loadUserImage = () => {
+        const jwt = auth.isAuthenticated()
+        getProfileImage({ userId: jwt.user._id }, { t: jwt.token })
+            .then(response => {
+                const base64 = btoa(
+                    new Uint8Array(response.data).reduce(
+                        (data, byte) => data + String.fromCharCode(byte),
+                        ''
+                    )
+                )
+                const image = `data:jpg;base64,${base64}`
+                this.setState({ photoSrc: image })
+            })
+            .catch(error => console.log(error.response))
+    }
+
     clickSubmit = e => {
         e.preventDefault()
         const jwt = auth.isAuthenticated()
@@ -120,38 +185,14 @@ class EditProfile extends Component {
                 })
             })
     }
-    handleChangeName = event => {
-        this.setState({ name: event.target.value })
-    }
-    handleChangeAbout = event => {
-        this.setState({ about: event.target.value })
-    }
-    handleChangeEmail = event => {
-        this.setState({ email: event.target.value })
-    }
-    handleChangePassword = event => {
-        this.setState({ password: event.target.value })
-    }
-    handleChangePhoto = event => {
-        let imageFormData = new FormData()
-        const jwt = auth.isAuthenticated()
-        imageFormData.append('imageName', event.target.files[0].name)
-        imageFormData.append('imageData', event.target.files[0])
-        saveProfileImage(this.match.params.userId, imageFormData, {
-            t: jwt.token,
-        })
-            .then(response => {
-                this.setState({
-                    imageName: response.data.image_name,
-                    imageData: response.data.image_data,
-                })
-            })
-            .catch(error => console.log(error))
-    }
+
     render() {
         const { classes } = this.props
         if (this.state.redirectToProfile) {
             return <Redirect to={'/user/' + this.state.userId} />
+        }
+        if (this.state.loading) {
+            return <LoadingSpinners loading={this.state.loading} />
         }
         return (
             <form onSubmit={this.clickSubmit}>
@@ -164,17 +205,18 @@ class EditProfile extends Component {
                         >
                             Edit Profile
                         </Typography>
-                        <Avatar
-                            src={
-                                this.state.imageData
-                                    ? '/' + slash(this.state.imageData)
-                                    : ''
-                            }
-                            className={classes.bigAvatar}
-                        />
+                        {this.state.photoSrc ? (
+                            <Avatar
+                                src={this.state.photoSrc}
+                                className={classes.bigAvatar}
+                            />
+                        ) : (
+                            <span></span>
+                        )}
                         <br />
                         <input
                             accept="image/*"
+                            name="imageData"
                             onChange={this.handleChangePhoto}
                             className={classes.input}
                             id="icon-button-file"
@@ -189,9 +231,6 @@ class EditProfile extends Component {
                                 Upload Image
                             </Button>
                         </label>
-                        <span className={classes.filename}>
-                            {this.state.imageName ? this.state.imageName : ''}
-                        </span>
                         <br />
                         <TextField
                             id="name"

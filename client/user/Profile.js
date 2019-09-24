@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import update from 'immutability-helper'
 import { Redirect, Link } from 'react-router-dom'
-import slash from 'slash'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
@@ -15,7 +14,7 @@ import {
 } from '@material-ui/core'
 import { Edit } from '@material-ui/icons'
 import auth from '../auth/auth-helper'
-import { read } from './api-user.js'
+import { read, getProfileImage } from './api-user.js'
 import { listByUser } from '../post/api-post'
 import DeleteUser from './DeleteUser'
 import FollowProfileButton from './FollowProfileButton'
@@ -28,13 +27,12 @@ const styles = theme => ({
         marginBottom: theme.spacing(3),
     },
     minHeight: {
-        minHeight: 200,
+        minHeight: 250,
     },
-    mediumAvatar: {
-        width: '100%',
-        height: 'auto',
-        marginTop: theme.spacing(2),
-        marginBottom: theme.spacing(2),
+    bigAvatar: {
+        width: 150,
+        height: 150,
+        margin: 'auto',
     },
     title: {
         margin: `${theme.spacing(3)}px 0 ${theme.spacing(3)}px`,
@@ -58,6 +56,7 @@ class Profile extends Component {
         super(props)
         this.state = {
             user: { following: [], followers: [] },
+            photoSrc: '',
             redirectToSignin: false,
             following: false,
             posts: [],
@@ -75,11 +74,18 @@ class Profile extends Component {
         )
             .then(response => {
                 let following = this.checkFollow(response.data)
-                this.setState({
-                    user: response.data,
-                    following: following,
-                    loading: false,
-                })
+                this.setState(
+                    () => {
+                        return {
+                            user: response.data,
+                            following: following,
+                            loading: false,
+                        }
+                    },
+                    () => {
+                        this.loadUserImage()
+                    }
+                )
                 this.loadPosts(response.data._id)
             })
             .catch(() => {
@@ -89,6 +95,22 @@ class Profile extends Component {
 
     componentDidMount() {
         this.init(this.props.match.params.userId)
+    }
+
+    loadUserImage = () => {
+        const jwt = auth.isAuthenticated()
+        getProfileImage({ userId: jwt.user._id }, { t: jwt.token })
+            .then(response => {
+                const base64 = btoa(
+                    new Uint8Array(response.data).reduce(
+                        (data, byte) => data + String.fromCharCode(byte),
+                        ''
+                    )
+                )
+                const image = `data:jpg;base64,${base64}`
+                this.setState({ photoSrc: image })
+            })
+            .catch(error => console.log(error.response))
     }
 
     checkFollow = user => {
@@ -152,18 +174,17 @@ class Profile extends Component {
                 <Typography variant="h2" gutterBottom>
                     Profile
                 </Typography>
-
                 <Grid container spacing={3} className={classes.minHeight}>
                     <Grid item xs={12} sm={2}>
-                        <Avatar
-                            className={classes.mediumAvatar}
-                            alt={this.state.user.name}
-                            src={
-                                this.state.user.image_data
-                                    ? '/' + slash(this.state.user.image_data)
-                                    : ''
-                            }
-                        />
+                        {this.state.photoSrc ? (
+                            <Avatar
+                                src={this.state.photoSrc}
+                                alt={this.state.user.name}
+                                className={classes.bigAvatar}
+                            />
+                        ) : (
+                            <span></span>
+                        )}
                     </Grid>
                     <Grid item xs={12} sm={10}>
                         <Grid container spacing={3}>
@@ -222,9 +243,7 @@ class Profile extends Component {
                         </Grid>
                     </Grid>
                 </Grid>
-
                 <Divider />
-
                 <ProfileTabs
                     user={this.state.user}
                     posts={this.state.posts}
