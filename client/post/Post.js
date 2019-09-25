@@ -67,20 +67,33 @@ class Post extends Component {
     }
 
     componentDidMount() {
-        this.setState({
-            like: this.checkLike(this.props.post.likes),
-            likes: this.props.post.likes.length,
-            comments: this.props.post.comments,
-        })
-        this.loadUserImage()
+        this.setState(
+            () => {
+                return {
+                    like: this.checkLike(this.props.post.likes),
+                    likes: this.props.post.likes.length,
+                    comments: this.props.post.comments,
+                }
+            },
+            () => {
+                this.loadUserImage()
+            }
+        )
     }
 
     UNSAFE_componentWillReceiveProps(props) {
-        this.setState({
-            like: this.checkLike(props.post.likes),
-            likes: props.post.likes.length,
-            comments: props.post.comments,
-        })
+        this.setState(
+            () => {
+                return {
+                    like: this.checkLike(props.post.likes),
+                    likes: props.post.likes.length,
+                    comments: props.post.comments,
+                }
+            },
+            () => {
+                this.loadUserImage()
+            }
+        )
     }
 
     updateComments = comments => {
@@ -118,7 +131,7 @@ class Post extends Component {
                 )
             })
             .catch(error => {
-                console.log(error.response.data.error)
+                console.log(error)
             })
     }
 
@@ -284,6 +297,10 @@ class Post extends Component {
             </Grid>
         )
     }
+}
+
+Post.defaultProps = {
+    updatesPostInfos: () => {},
 }
 
 Post.propTypes = {

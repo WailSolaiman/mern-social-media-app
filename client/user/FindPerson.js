@@ -11,6 +11,8 @@ import {
     Button,
     IconButton,
 } from '@material-ui/core'
+import { getProfileImage } from './api-user'
+import auth from '../auth/auth-helper'
 import VisibilityIcon from '@material-ui/icons/Visibility'
 
 const styles = theme => ({
@@ -28,13 +30,35 @@ const styles = theme => ({
 class FindPerson extends Component {
     constructor(props) {
         super(props)
+        this._isMounted = false
         this.state = {
+            user: this.props.user,
             photoSrc: '',
         }
     }
 
     componentDidMount() {
-        this.loadUserImage()
+        this._isMounted = true
+        this._isMounted && this.loadUserImage()
+    }
+
+    UNSAFE_componentWillReceiveProps(props) {
+        this.setState(
+            () => {
+                return {
+                    user: props.user,
+                }
+            },
+            () => this.loadUserImage()
+        )
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false
+    }
+
+    updateFindPeopleList = (user, index) => {
+        this.props.clickFollow(user, index)
     }
 
     loadUserImage = () => {
@@ -48,14 +72,15 @@ class FindPerson extends Component {
                     )
                 )
                 const image = `data:jpg;base64,${base64}`
-                this.setState({ photoSrc: image })
+                this._isMounted && this.setState({ photoSrc: image })
             })
             .catch(error => console.log(error.response))
     }
 
     render() {
-        const { classes } = this.props
-        const { _id, name } = this.props.user
+        const { classes, index } = this.props
+        const { user } = this.state
+        const { _id, name } = this.state.user
         return (
             <ListItem>
                 <ListItemAvatar className={classes.avatar}>
@@ -76,7 +101,7 @@ class FindPerson extends Component {
                         aria-label="Follow"
                         variant="contained"
                         color="primary"
-                        onClick={this.clickFollow.bind(this, user, i)}
+                        onClick={() => this.updateFindPeopleList(user, index)}
                     >
                         Follow
                     </Button>
@@ -89,6 +114,8 @@ class FindPerson extends Component {
 FindPerson.propTypes = {
     classes: PropTypes.object.isRequired,
     user: PropTypes.object,
+    index: PropTypes.number,
+    clickFollow: PropTypes.func,
 }
 
 export default withStyles(styles)(FindPerson)

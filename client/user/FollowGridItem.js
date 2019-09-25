@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import { Avatar, GridListTile, Typography } from '@material-ui/core'
+import { getProfileImage } from './api-user'
+import auth from '../auth/auth-helper'
 
 const styles = theme => ({
     bigAvatar: {
-        width: '75%',
-        height: 'auto',
+        width: 200,
+        height: 200,
         marginLeft: 'auto',
         marginRight: 'auto',
         marginTop: theme.spacing(2),
@@ -49,7 +51,7 @@ class FollowGridItem extends Component {
     render() {
         const { person, classes } = this.props
         return (
-            <GridListTile>
+            <GridListTile cols={2}>
                 <Link to={'/user/' + person._id}>
                     <Avatar
                         alt={person.name}
@@ -65,7 +67,7 @@ class FollowGridItem extends Component {
     }
 }
 
-FollowGrid.propTypes = {
+FollowGridItem.propTypes = {
     classes: PropTypes.object.isRequired,
     person: PropTypes.object,
 }

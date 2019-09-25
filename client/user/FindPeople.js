@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import update from 'immutability-helper'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
@@ -11,6 +12,7 @@ import {
 import LoadingSpinners from '../core/LoadingSpinners'
 import { findPeople, follow } from './api-user.js'
 import auth from '../auth/auth-helper'
+import FindPerson from './FindPerson'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
@@ -51,6 +53,10 @@ class FindPeople extends Component {
     }
 
     componentDidMount = () => {
+        this.findPeopleToFollow()
+    }
+
+    findPeopleToFollow = () => {
         const jwt = auth.isAuthenticated()
         findPeople(
             {
@@ -78,19 +84,21 @@ class FindPeople extends Component {
                 t: jwt.token,
             },
             user._id
-        ).then(data => {
-            if (data.error) {
-                this.setState({ error: data.error })
-            } else {
-                let toFollow = this.state.users
-                toFollow.splice(index, 1)
+        )
+            .then(() => {
+                //const index = this.state.users.indexOf(user)
+                const users = update(this.state.users, {
+                    $splice: [[index, 1]],
+                })
                 this.setState({
-                    users: toFollow,
+                    users,
                     open: true,
                     followMessage: `Following ${user.name}!`,
                 })
-            }
-        })
+            })
+            .catch(error => {
+                this.setState({ error: error.response })
+            })
     }
 
     handleRequestClose = () => {
@@ -119,7 +127,14 @@ class FindPeople extends Component {
                     )}
                     <List>
                         {this.state.users.map((user, i) => {
-                            return <FindPerson user={user} key={i} />
+                            return (
+                                <FindPerson
+                                    user={user}
+                                    clickFollow={this.clickFollow}
+                                    key={i}
+                                    index={i}
+                                />
+                            )
                         })}
                     </List>
                 </Paper>

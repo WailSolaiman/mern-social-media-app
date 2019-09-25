@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core'
 import {
     Grid,
@@ -10,12 +11,13 @@ import {
     Divider,
 } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete'
+import { getProfileImage } from '../user/api-user'
 import auth from '../auth/auth-helper'
 
 const styles = () => ({
     smallAvatar: {
-        width: '50%',
-        height: 'auto',
+        width: 60,
+        height: 60,
         margin: '0 auto',
     },
     commentDate: {
@@ -68,7 +70,7 @@ class Comment extends Component {
         const { comment, deleteComment, classes } = this.props
         const { name } = this.props.comment.postedBy
         return (
-            <ListItem key={i}>
+            <ListItem>
                 <Grid
                     container
                     spacing={3}
@@ -119,7 +121,7 @@ class Comment extends Component {
     }
 }
 
-Comments.propTypes = {
+Comment.propTypes = {
     classes: PropTypes.object.isRequired,
     comment: PropTypes.object,
     deleteComment: PropTypes.func,

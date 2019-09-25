@@ -79,7 +79,6 @@ class NewPost extends Component {
         const jwt = auth.isAuthenticated()
         getProfileImage({ userId: jwt.user._id }, { t: jwt.token })
             .then(response => {
-                console.log('response: ', response.data)
                 const base64 = btoa(
                     new Uint8Array(response.data).reduce(
                         (data, byte) => data + String.fromCharCode(byte),

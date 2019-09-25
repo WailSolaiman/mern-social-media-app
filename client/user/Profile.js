@@ -99,7 +99,10 @@ class Profile extends Component {
 
     loadUserImage = () => {
         const jwt = auth.isAuthenticated()
-        getProfileImage({ userId: jwt.user._id }, { t: jwt.token })
+        getProfileImage(
+            { userId: this.props.match.params.userId },
+            { t: jwt.token }
+        )
             .then(response => {
                 const base64 = btoa(
                     new Uint8Array(response.data).reduce(

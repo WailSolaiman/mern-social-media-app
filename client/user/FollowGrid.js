@@ -18,7 +18,12 @@ class FollowGrid extends Component {
     render() {
         const { classes } = this.props
         return (
-            <GridList cellHeight={300} className={classes.gridList} cols={4}>
+            <GridList
+                cellHeight={300}
+                cols={2}
+                spacing={2}
+                className={classes.gridList}
+            >
                 {this.props.people.map((person, i) => {
                     return <FollowGridItem person={person} key={i} />
                 })}
