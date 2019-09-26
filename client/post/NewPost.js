@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
 import {
     Grid,
     TextField,
@@ -8,6 +7,7 @@ import {
     Icon,
     Button,
     Typography,
+    withStyles,
 } from '@material-ui/core'
 import { read, getProfileImage } from '../user/api-user'
 import { create } from './api-post.js'

@@ -1,18 +1,18 @@
 import React, { Component } from 'react'
 import update from 'immutability-helper'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
 import {
     List,
     Paper,
     Snackbar,
     SnackbarContent,
     Typography,
+    withStyles,
 } from '@material-ui/core'
-import LoadingSpinners from '../core/LoadingSpinners'
 import { findPeople, follow } from './api-user.js'
 import auth from '../auth/auth-helper'
 import FindPerson from './FindPerson'
+import LoadingSpinners from '../core/LoadingSpinners'
 
 const styles = theme => ({
     root: theme.mixins.gutters({
@@ -86,7 +86,6 @@ class FindPeople extends Component {
             user._id
         )
             .then(() => {
-                //const index = this.state.users.indexOf(user)
                 const users = update(this.state.users, {
                     $splice: [[index, 1]],
                 })

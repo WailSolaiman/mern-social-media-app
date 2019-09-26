@@ -1,14 +1,19 @@
 import React, { Component } from 'react'
 import update from 'immutability-helper'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
-import { Container, Grid, Typography, Divider } from '@material-ui/core'
+import {
+    Container,
+    Grid,
+    Typography,
+    Divider,
+    withStyles,
+} from '@material-ui/core'
+import { listNewsFeed } from './api-post.js'
+import auth from '../auth/auth-helper'
 import NewPost from './NewPost'
 import PostList from './PostList'
 import FindPeople from '../user/FindPeople'
 import LoadingSpinners from '../core/LoadingSpinners'
-import auth from '../auth/auth-helper'
-import { listNewsFeed } from './api-post.js'
 
 const styles = theme => ({
     container: {
@@ -30,6 +35,10 @@ class Newsfeed extends Component {
     }
 
     componentDidMount() {
+        this.DisplayAllNewsFeed()
+    }
+
+    DisplayAllNewsFeed = () => {
         const jwt = auth.isAuthenticated()
         listNewsFeed(
             {

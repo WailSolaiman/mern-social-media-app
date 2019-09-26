@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
 import {
     Card,
     CardActions,
@@ -11,9 +10,10 @@ import {
     Icon,
     Avatar,
     Typography,
+    withStyles,
 } from '@material-ui/core'
-import auth from './../auth/auth-helper'
 import { read, update, saveProfileImage, getProfileImage } from './api-user.js'
+import auth from './../auth/auth-helper'
 import LoadingSpinners from '../core/LoadingSpinners'
 
 const styles = theme => ({
@@ -70,6 +70,7 @@ class EditProfile extends Component {
         }
         this.match = match
     }
+
     componentDidMount = () => {
         this.readUserInfo()
         this.loadUserImage()

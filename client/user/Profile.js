@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import update from 'immutability-helper'
 import { Redirect, Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
 import {
     Container,
     Grid,
@@ -11,11 +10,12 @@ import {
     IconButton,
     Divider,
     Typography,
+    withStyles,
 } from '@material-ui/core'
 import { Edit } from '@material-ui/icons'
-import auth from '../auth/auth-helper'
 import { read, getProfileImage } from './api-user.js'
 import { listByUser } from '../post/api-post'
+import auth from '../auth/auth-helper'
 import DeleteUser from './DeleteUser'
 import FollowProfileButton from './FollowProfileButton'
 import LoadingSpinners from '../core/LoadingSpinners'
@@ -256,6 +256,7 @@ class Profile extends Component {
         )
     }
 }
+
 Profile.propTypes = {
     classes: PropTypes.object.isRequired,
 }

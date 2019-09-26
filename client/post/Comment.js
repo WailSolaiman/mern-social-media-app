@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
 import {
     Grid,
     Box,
@@ -9,6 +8,7 @@ import {
     Typography,
     Avatar,
     Divider,
+    withStyles,
 } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete'
 import { getProfileImage } from '../user/api-user'

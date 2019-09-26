@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import bootbox from 'bootbox'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
-import { TextField } from '@material-ui/core'
-import auth from '../auth/auth-helper'
+import { TextField, withStyles } from '@material-ui/core'
 import { comment, uncomment } from './api-post.js'
+import auth from '../auth/auth-helper'
 import Comment from './Comment'
 
 const styles = theme => ({

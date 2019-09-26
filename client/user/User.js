@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
 import {
     Grid,
     Card,
@@ -9,6 +8,7 @@ import {
     CardContent,
     CardMedia,
     Typography,
+    withStyles,
 } from '@material-ui/core'
 import { getProfileImage } from './api-user.js'
 import auth from '../auth/auth-helper'

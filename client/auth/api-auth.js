@@ -1,27 +1,23 @@
+import axios from 'axios'
+
 const signin = user => {
-    return fetch('/auth/signin/', {
-        method: 'POST',
+    return axios({
+        method: 'post',
+        url: '/auth/signin/',
+        data: user,
+        withCredentials: true,
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
-        credentials: 'include',
-        body: JSON.stringify(user),
     })
-        .then(response => {
-            return response.json()
-        })
-        .catch(err => console.log(err))
 }
 
 const signout = () => {
-    return fetch('/auth/signout/', {
-        method: 'GET',
+    return axios({
+        method: 'get',
+        url: '/auth/signout/',
     })
-        .then(response => {
-            return response.json()
-        })
-        .catch(err => console.log(err))
 }
 
 export { signin, signout }

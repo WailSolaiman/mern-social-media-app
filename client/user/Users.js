@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
-import { Container, Grid, Typography } from '@material-ui/core'
+import { Container, Grid, Typography, withStyles } from '@material-ui/core'
 import { list } from './api-user.js'
 import User from './User'
 import LoadingSpinners from '../core/LoadingSpinners'

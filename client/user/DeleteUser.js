@@ -10,9 +10,9 @@ import {
     Button,
     IconButton,
 } from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
-import auth from './../auth/auth-helper'
 import { remove } from './api-user.js'
+import auth from './../auth/auth-helper'
+import DeleteIcon from '@material-ui/icons/Delete'
 
 class DeleteUser extends Component {
     constructor(props) {
@@ -22,9 +22,11 @@ class DeleteUser extends Component {
             open: false,
         }
     }
+
     clickButton = () => {
         this.setState({ open: true })
     }
+
     deleteAccount = () => {
         const jwt = auth.isAuthenticated()
         remove(
@@ -41,9 +43,11 @@ class DeleteUser extends Component {
                 console.log(error.response.data.error)
             })
     }
+
     handleRequestClose = () => {
         this.setState({ open: false })
     }
+
     render() {
         const redirect = this.state.redirect
         if (redirect) {
@@ -89,7 +93,9 @@ class DeleteUser extends Component {
         )
     }
 }
+
 DeleteUser.propTypes = {
     userId: PropTypes.string.isRequired,
 }
+
 export default DeleteUser

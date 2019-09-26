@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
 import {
     Dialog,
     DialogActions,
@@ -15,6 +14,7 @@ import {
     TextField,
     Typography,
     Icon,
+    withStyles,
 } from '@material-ui/core'
 import { create } from './api-user.js'
 
@@ -56,12 +56,15 @@ class Signup extends Component {
             error: '',
         }
     }
+
     handleChange = name => event => {
         this.setState({ [name]: event.target.value })
     }
+
     closeDialog = () => {
         this.setState({ errorOpen: false })
     }
+
     clickSubmit = e => {
         e.preventDefault()
         const user = {

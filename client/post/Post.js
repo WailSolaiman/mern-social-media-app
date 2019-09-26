@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import bootbox from 'bootbox'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
 import {
     Grid,
     Box,
@@ -15,6 +14,7 @@ import {
     IconButton,
     Divider,
     Typography,
+    withStyles,
 } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete'
 import FavoriteIcon from '@material-ui/icons/Favorite'
@@ -22,9 +22,9 @@ import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder'
 import MessageIcon from '@material-ui/icons/Message'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
-import auth from '../auth/auth-helper'
 import { remove, like, unlike } from './api-post.js'
 import { getProfileImage } from '../user/api-user'
+import auth from '../auth/auth-helper'
 import Comments from './Comments'
 
 const styles = theme => ({

@@ -57,16 +57,15 @@ class Signin extends Component {
             email: this.state.email || undefined,
             password: this.state.password || undefined,
         }
-
-        signin(user).then(data => {
-            if (data.error) {
-                this.setState({ error: data.error })
-            } else {
-                auth.authenticate(data, () => {
+        signin(user)
+            .then(response => {
+                auth.authenticate(response.data, () => {
                     this.setState({ redirectToReferrer: true })
                 })
-            }
-        })
+            })
+            .catch(error => {
+                this.setState({ error: error.response.data.error })
+            })
     }
 
     handleChange = name => event => {

@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
-import { GridList } from '@material-ui/core'
+import { GridList, withStyles } from '@material-ui/core'
 import FollowGridItem from './FollowGridItem'
 
 const styles = () => ({

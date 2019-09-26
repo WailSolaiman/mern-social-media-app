@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core'
-import { Avatar, GridListTile, Typography } from '@material-ui/core'
+import { Avatar, GridListTile, Typography, withStyles } from '@material-ui/core'
 import { getProfileImage } from './api-user'
 import auth from '../auth/auth-helper'
 
@@ -48,6 +47,7 @@ class FollowGridItem extends Component {
             })
             .catch(error => console.log(error.response))
     }
+
     render() {
         const { person, classes } = this.props
         return (
