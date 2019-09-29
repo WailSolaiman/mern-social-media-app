@@ -25,6 +25,7 @@ const styles = theme => ({
     container: {
         marginTop: theme.spacing(3),
         marginBottom: theme.spacing(3),
+        backgroundColor: 'white',
     },
     minHeight: {
         minHeight: 250,
@@ -79,7 +80,6 @@ class Profile extends Component {
                         return {
                             user: response.data,
                             following: following,
-                            loading: false,
                         }
                     },
                     () => {
@@ -111,7 +111,16 @@ class Profile extends Component {
                     )
                 )
                 const image = `data:jpg;base64,${base64}`
-                this.setState({ photoSrc: image })
+                this.setState(
+                    () => {
+                        return { photoSrc: image }
+                    },
+                    () => {
+                        setTimeout(() => {
+                            this.setState({ loading: false })
+                        }, 1000)
+                    }
+                )
             })
             .catch(error => console.log(error.response))
     }

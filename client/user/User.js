@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core'
 import { getProfileImage } from './api-user.js'
 import auth from '../auth/auth-helper'
+import LoadingSpinners from '../core/LoadingSpinners'
 
 const styles = theme => ({
     card: {
@@ -32,6 +33,7 @@ class User extends Component {
         super(props)
         this.state = {
             photoSrc: '',
+            loading: true,
         }
     }
 
@@ -50,7 +52,16 @@ class User extends Component {
                     )
                 )
                 const image = `data:jpg;base64,${base64}`
-                this.setState({ photoSrc: image })
+                this.setState(
+                    () => {
+                        return { photoSrc: image }
+                    },
+                    () => {
+                        setTimeout(() => {
+                            this.setState({ loading: false })
+                        }, 50)
+                    }
+                )
             })
             .catch(error => console.log(error.response))
     }
@@ -58,6 +69,9 @@ class User extends Component {
     render() {
         const { classes } = this.props
         const { user } = this.props
+        if (this.state.loading) {
+            return <LoadingSpinners loading={this.state.loading} />
+        }
         return (
             <Grid item xs={12} sm={6} md={3}>
                 <Link

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Container, Grid, Typography, withStyles } from '@material-ui/core'
+import { Container, Grid, withStyles } from '@material-ui/core'
 import { list } from './api-user.js'
 import User from './User'
 import LoadingSpinners from '../core/LoadingSpinners'
@@ -9,6 +9,7 @@ const styles = theme => ({
     container: {
         marginTop: theme.spacing(3),
         marginBottom: theme.spacing(3),
+        backgroundColor: 'white',
     },
 })
 
@@ -28,8 +29,18 @@ class Users extends Component {
     usersList = () => {
         list()
             .then(response => {
-                this.setState({ users: response.data, loading: false })
+                this.setState(
+                    () => {
+                        return { users: response.data }
+                    },
+                    () => {
+                        setTimeout(() => {
+                            this.setState({ loading: false })
+                        }, 1000)
+                    }
+                )
             })
+
             .catch(error => {
                 console.log(error.response.data.error)
             })
@@ -43,13 +54,8 @@ class Users extends Component {
         return (
             <Container maxWidth="lg" className={classes.container}>
                 <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                        <Typography variant="h2" gutterBottom>
-                            Users
-                        </Typography>
-                    </Grid>
                     {this.state.users.map((user, i) => {
-                        return <User user={user} key={i} />
+                        return <User key={i} user={user} />
                     })}
                 </Grid>
             </Container>

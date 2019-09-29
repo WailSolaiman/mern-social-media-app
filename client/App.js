@@ -6,6 +6,7 @@ import { hot } from 'react-hot-loader/root'
 import MainRouter from './MainRouter'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
+import './app.css'
 
 const theme = createMuiTheme({
     palette: {

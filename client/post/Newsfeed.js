@@ -49,7 +49,16 @@ class Newsfeed extends Component {
             }
         )
             .then(response => {
-                this.setState({ posts: response.data, loading: false })
+                this.setState(
+                    () => {
+                        return { posts: response.data }
+                    },
+                    () => {
+                        setTimeout(() => {
+                            this.setState({ loading: false })
+                        }, 1000)
+                    }
+                )
             })
             .catch(error => {
                 console.log(error.response.data.error)
