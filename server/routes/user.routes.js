@@ -25,7 +25,10 @@ router
         userCtrl.createAvatarImage
     )
 
-router.route('/api/image/avatar/:userId').get(userCtrl.getAvatarImage)
+router
+    .route('/api/image/avatar/:userId')
+    .get(userCtrl.getAvatarImage, userCtrl.defaultPhoto)
+//router.route('/api/users/defaultphoto').get(userCtrl.defaultPhoto)
 
 router
     .route('/api/users/follow')

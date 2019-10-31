@@ -4,6 +4,7 @@ import errorHandler from './../helpers/dbErrorHandler'
 import { gridFSBucketUser } from '../../config/gridFSBucketUser'
 import { ObjectID } from 'mongodb'
 import { Readable } from 'stream'
+import profileImage from '../../client/assets/images/profile-pic.jpg'
 
 const create = (req, res) => {
     const user = new User(req.body)
@@ -105,28 +106,34 @@ const createAvatarImage = (req, res) => {
     })
 }
 
-const getAvatarImage = (req, res) => {
-    let user = req.profile
-    let photoId
-    try {
-        photoId = new ObjectID(user.photoId)
-    } catch (err) {
-        return res.status(400).json({
-            message: 'Invalid postID',
+const defaultPhoto = (req, res) => {
+    return res.sendFile(process.cwd() + profileImage)
+}
+
+const getAvatarImage = (req, res, next) => {
+    if (req.profile.photoId) {
+        let user = req.profile
+        let photoId
+        try {
+            photoId = new ObjectID(user.photoId)
+        } catch (err) {
+            return res.status(400).json({
+                message: 'Invalid postID',
+            })
+        }
+        res.set('Content-Type', 'image/jpg')
+        res.set('Accept-Ranges', 'bytes')
+        let downloadStream = gridFSBucketUser.openDownloadStream(photoId)
+        downloadStream.on('data', chunk => {
+            res.write(chunk)
         })
-    }
-    res.set('Content-Type', 'image/jpg')
-    res.set('Accept-Ranges', 'bytes')
-    let downloadStream = gridFSBucketUser.openDownloadStream(photoId)
-    downloadStream.on('data', chunk => {
-        res.write(chunk)
-    })
-    downloadStream.on('error', () => {
-        res.sendStatus(404)
-    })
-    downloadStream.on('end', () => {
-        res.end()
-    })
+        downloadStream.on('error', () => {
+            res.sendStatus(404)
+        })
+        downloadStream.on('end', () => {
+            res.end()
+        })
+    } else next()
 }
 
 const addFollowing = (req, res, next) => {
@@ -220,6 +227,7 @@ export default {
     update,
     createAvatarImage,
     getAvatarImage,
+    defaultPhoto,
     addFollowing,
     addFollower,
     removeFollowing,

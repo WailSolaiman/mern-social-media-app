@@ -52,16 +52,7 @@ class User extends Component {
                     )
                 )
                 const image = `data:jpg;base64,${base64}`
-                this.setState(
-                    () => {
-                        return { photoSrc: image }
-                    },
-                    () => {
-                        setTimeout(() => {
-                            this.setState({ loading: false })
-                        }, 50)
-                    }
-                )
+                this.setState({ photoSrc: image, loading: false })
             })
             .catch(error => console.log(error.response))
     }

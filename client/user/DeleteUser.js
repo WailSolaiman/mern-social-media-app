@@ -36,7 +36,7 @@ class DeleteUser extends Component {
             { t: jwt.token }
         )
             .then(() => {
-                auth.signout(() => console.log('deleted'))
+                auth.signout(() => console.log('Acount Deleted.'))
                 this.setState({ redirect: true })
             })
             .catch(error => {

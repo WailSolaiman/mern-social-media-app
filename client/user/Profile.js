@@ -175,6 +175,7 @@ class Profile extends Component {
     render() {
         const { classes } = this.props
         const redirectToSignin = this.state.redirectToSignin
+        //const profileImg = this.state.photoSrc === '' ? '' : this.state.photoSrc
         if (redirectToSignin) {
             return <Redirect to="/signin" />
         }
@@ -188,15 +189,11 @@ class Profile extends Component {
                 </Typography>
                 <Grid container spacing={3} className={classes.minHeight}>
                     <Grid item xs={12} sm={2}>
-                        {this.state.photoSrc ? (
-                            <Avatar
-                                src={this.state.photoSrc}
-                                alt={this.state.user.name}
-                                className={classes.bigAvatar}
-                            />
-                        ) : (
-                            <span></span>
-                        )}
+                        <Avatar
+                            src={this.state.photoSrc}
+                            alt={this.state.user.name}
+                            className={classes.bigAvatar}
+                        />
                     </Grid>
                     <Grid item xs={12} sm={10}>
                         <Grid container spacing={3}>
